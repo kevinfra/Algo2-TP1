@@ -58,7 +58,7 @@
 \par \textbf{TAD} posicion \textbf{ES} tupla(nat $x$, nat $y$)
 \par \textbf{TAD} movimiento \textbf{ES} tupla(posicion $pos$, direccion $dir$)
 \par \textbf{TAD} direccion \textbf{ES} enum\{arriba, abajo, izquierda, derecha\}
-\par \textbf{TAD} placa, ancho, alto \textbf{ES} nat
+\par \textbf{TAD} placa \textbf{ES} nat
 
 %TADS
 \section{TAD \tadNombre{Campus}}
@@ -105,6 +105,7 @@
 \tadOperacion{esHippie?}{campus, posicion}{bool}{}
 \tadOperacion{esAS?}{campus, placa}{bool}{}
 
+% Axiomas
 \tadAxiomas[\paratodo{bool}{x,y}]
 
 \tadAlinearAxiomas{false $\oluego$ $x$}
@@ -140,15 +141,28 @@
 % Generadores
 \tadGeneradores
 
-\tadOperacion{crearGrilla}{ancho, alto}{grilla}{}
+\tadOperacion{crearGrilla}{nat, nat}{grilla}{}
 \tadOperacion{agregarObstaculo}{grilla, posicion}{grilla}{}
 
 % Observadores
 \tadObservadores
 
-\tadOperacion{ancho}{}{nat}{}
-\tadOperacion{alto}{}{nat}{}
-\tadOperacion{obstaculos}{}{conj(posicion)}{}
+\tadOperacion{ancho}{grilla}{nat}{}
+\tadOperacion{alto}{grilla}{nat}{}
+\tadOperacion{obstaculos}{grilla}{conj(posicion)}{}
+
+% Axiomas
+\tadAxiomas[\paratodo{nat}{an, al}, \paratodo{grilla}{g}, \paratodo{posicion}{p}]
+\tadAlinearAxiomas{obstaculos(agregarObstaculo(g, p))}
+
+\tadAxioma{ancho(crearGrilla(an, al))}{an}
+\tadAxioma{ancho(agregarObstaculo(g, p))}{ancho(g)}
+
+\tadAxioma{alto(crearGrilla(an, al))}{al}
+\tadAxioma{alto(agregarObstaculo(g, p))}{alto(g)}
+
+\tadAxioma{obstaculos(crearGrilla(an, al))}{$\emptyset$}
+\tadAxioma{obstaculos(agregarObstaculo(g, p))}{Ag(p, obstaculos(g))}
 
 \end{tad}
 \end{document}
