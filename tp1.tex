@@ -58,7 +58,7 @@
 \par \textbf{TAD} posicion \textbf{ES} tupla(nat $x$, nat $y$)
 \par \textbf{TAD} movimiento \textbf{ES} tupla(posicion $pos$, direccion $dir$)
 \par \textbf{TAD} direccion \textbf{ES} enum\{arriba, abajo, izquierda, derecha\}
-\par \textbf{TAD} placa \textbf{ES} nat
+\par \textbf{TAD} placa, ancho, alto \textbf{ES} nat
 
 %TADS
 \section{TAD \tadNombre{Campus}}
@@ -133,9 +133,22 @@
 
 \tadExporta{grilla, generadores, observadores basicos}
 
-\tadIgualdadObservacionalSimple{}
+\tadIgualdadObservacional{n}{m}{nat}{$(n=0? \igobs m=0?)\ \yluego$\\ $(\neg(n=0?) \impluego (\text{pred}(n) \igobs \text{pred}(m)))$}
 
-\tadAlinearFunciones{entraEstudiante}{campus/c, posicion/p, direccion/dir}{}
+\tadAlinearFunciones{agregarObstaculo}{grilla, posicion}{}
+
+% Generadores
+\tadGeneradores
+
+\tadOperacion{crearGrilla}{ancho, alto}{grilla}{}
+\tadOperacion{agregarObstaculo}{grilla, posicion}{grilla}{}
+
+% Observadores
+\tadObservadores
+
+\tadOperacion{ancho}{}{nat}{}
+\tadOperacion{alto}{}{nat}{}
+\tadOperacion{obstaculos}{}{conj(posicion)}{}
 
 \end{tad}
 \end{document}
