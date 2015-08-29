@@ -1,0 +1,141 @@
+\documentclass[10pt, a4paper]{article}
+\usepackage[paper=a4paper, left=1.5cm, right=1.5cm, bottom=1.5cm, top=3.5cm]{geometry}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+\usepackage{latexsym}
+\usepackage{lastpage}
+\usepackage{aed2-symb,aed2-itef,aed2-tad}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+\usepackage{calc}
+
+\newcommand{\f}[1]{\text{#1}}
+\renewcommand{\paratodo}[2]{$\forall~#2$: #1}
+
+\sloppy
+
+\hypersetup{%
+ % Para que el PDF se abra a página completa.
+ pdfstartview= {FitH \hypercalcbp{\paperheight-\topmargin-1in-\headheight}},
+ pdfauthor={Grupo MISSINGNO - Algoritmos y Estructuras de Datos II},
+ pdfkeywords={Trabajo Practico 1},
+ pdfsubject={Alta seguridad nos cuida}
+}
+
+\parskip=5pt % 10pt es el tamaño de fuente
+
+% Pongo en 0 la distancia extra entre ítemes.
+\let\olditemize\itemize
+\def\itemize{\olditemize\itemsep=0pt}
+
+% Acomodo fancyhdr.
+\pagestyle{fancy}
+\thispagestyle{fancy}
+\addtolength{\headheight}{1pt}
+\lhead{Algoritmos y Estructuras de Datos II}
+\rhead{$1^{\mathrm{er}}$ cuatrimestre de 2012}
+\cfoot{\thepage /\pageref{LastPage}}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\author{Grupo MISSINGNO - Algoritmos y Estructuras de Datos II}
+\date{2do cuatrimestre 2015}
+\title{Trabajo Practico 1}
+
+\begin{document}
+
+%Pagina de titulo e indice
+\thispagestyle{empty}
+
+\maketitle
+\tableofcontents
+
+\newpage
+
+\section{TADs Auxiliares}
+\par \textbf{TAD} as \textbf{ES} tupla(posicion $pos$, nat $capturas$, nat $sanciones$)
+\par \textbf{TAD} posicion \textbf{ES} tupla(nat $x$, nat $y$)
+\par \textbf{TAD} movimiento \textbf{ES} tupla(posicion $pos$, direccion $dir$)
+\par \textbf{TAD} direccion \textbf{ES} enum\{arriba, abajo, izquierda, derecha\}
+\par \textbf{TAD} placa \textbf{ES} nat
+
+%TADS
+\section{TAD \tadNombre{Campus}}
+
+\begin{tad}{\tadNombre{Campus}}
+
+\tadGeneros{campus}
+
+\tadExporta{campus, generadores, observadores basicos}
+
+\tadIgualdadObservacionalSimple{}
+
+\tadAlinearFunciones{entraEstudiante}{campus/c, posicion/p, direccion/dir}{}
+
+% Generadores
+\tadGeneradores
+
+\tadOperacion{crearCampus}{grilla/g, dicc(placa, as)/ass}{campus}{posValidas?(g, ass) $\land$ sinCapturas?(ass) $\land$ sinSanciones?(ass)}
+\tadOperacion{entraEstudiante}{campus/c, posicion/p}{campus}{posVacia?(c, p) $\land$ esEntrada?(c, p)}
+\tadOperacion{entraHippie}{campus/c, posicion/p}{campus}{posVacia?(c, p) $\land$ esEntrada?(c, p)}
+\tadOperacion{saleEstudiante}{campus/c, posicion/p}{campus}{esEstudiante?(c, p) $\land$ esEntrada?(c, p)}
+\tadOperacion{movEstudiante}{campus/c, posicion/p, direccion/dir}{campus}{esEstudiante?(c, p) $\land$ dirValida?(c, p, dir)}
+\tadOperacion{movHippie}{campus/c, posicion/p}{campus}{esHippie?(c, p)}
+\tadOperacion{movAS}{campus/c, placa}{campus}{esAS?(c, placa)}
+
+% Observadores
+\tadObservadores
+
+\tadOperacion{grilla}{campus}{grilla}{}
+\tadOperacion{asshole}{campus}{dicc(placa, as)}{}
+\tadOperacion{estudiantes}{campus}{conj(posicion)}{}
+\tadOperacion{hippies}{campus}{conj(posicion)}{}
+
+% Otras operaciones
+\tadOtrasOperaciones
+
+\tadOperacion{posValidas?}{grilla, dicc(placa, as)}{bool}{}
+\tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
+\tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
+\tadOperacion{posVacia?}{campus, posicion}{bool}{}
+\tadOperacion{esEntrada?}{campus, posicion}{bool}{}
+\tadOperacion{esEstudiante?}{campus, posicion}{bool}{}
+\tadOperacion{dirValida?}{campus, posicion, direccion}{bool}{}
+\tadOperacion{esHippie?}{campus, posicion}{bool}{}
+\tadOperacion{esAS?}{campus, placa}{bool}{}
+
+\tadAxiomas[\paratodo{bool}{x,y}]
+
+\tadAlinearAxiomas{false $\oluego$ $x$}
+\tadAxioma{$\neg$ true}{false}
+\tadAxioma{$\neg$ false}{true}
+
+\tadAxioma{true $\lor$ $x$}{true}
+\tadAxioma{false $\lor$ $x$}{$x$}
+
+\tadAxioma{true $\land$ $x$}{$x$}
+\tadAxioma{false $\land$ $x$}{false}
+
+\tadAxioma{$x$ $\implies$ $y$}{$\neg x \lor y$}
+
+\tadAxioma{$x$ $\yluego$ $y$}{\IF $x$ THEN $y$ ELSE false FI}
+\tadAxioma{$x$ $\oluego$ $y$}{\IF $x$ THEN true ELSE $y$ FI}
+\tadAxioma{$x$ $\impluego$ $y$}{$\neg x \oluego y$}
+
+\end{tad}
+
+\section{TAD \tadNombre{Grilla}}
+
+\begin{tad}{\tadNombre{Grilla}}
+
+\tadGeneros{grilla}
+
+\tadExporta{grilla, generadores, observadores basicos}
+
+\tadIgualdadObservacionalSimple{}
+
+\tadAlinearFunciones{entraEstudiante}{campus/c, posicion/p, direccion/dir}{}
+
+\end{tad}
+\end{document}
