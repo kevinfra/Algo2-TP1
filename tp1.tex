@@ -133,7 +133,7 @@
 
 \tadExporta{grilla, generadores, observadores basicos}
 
-\tadIgualdadObservacional{n}{m}{nat}{$(n=0? \igobs m=0?)\ \yluego$\\ $(\neg(n=0?) \impluego (\text{pred}(n) \igobs \text{pred}(m)))$}
+\tadIgualdadObservacional{g1}{g2}{grilla}{$(ancho(g1) \igobs ancho(g2))\ \land$\\ $(alto(g1) \igobs alto(g2))\ \land$\\ $(obstaculos(g1) \igobs obstaculos(g2))$}
 
 \tadAlinearFunciones{agregarObstaculo}{grilla, posicion}{}
 
