@@ -76,7 +76,7 @@
 % Generadores
 \tadGeneradores
 
-\tadOperacion{crearCampus}{grilla/g, dicc(placa, as)/ass}{campus}{posValidas?(g, ass) $\land$ posSinObstaculos?(g, ass) $\land$ sinCapturas?(ass) $\land$ sinSanciones?(ass)}
+\tadOperacion{crearCampus}{grilla/g, dicc(placa, as)/ass}{campus}{asValidos?(g, ass)}
 \tadOperacion{entraEstudiante}{campus/c, posicion/p}{campus}{posValida?(grilla(c), p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
 \tadOperacion{entraHippie}{campus/c, posicion/p}{campus}{posValida?(grilla(c), p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
 \tadOperacion{saleEstudiante}{campus/c, posicion/p}{campus}{esEstudiante?(c, p) $\land$ esEntrada?(c, p)}
@@ -95,8 +95,9 @@
 % Otras operaciones
 \tadOtrasOperaciones
 
-\tadOperacion{posValidas?}{grilla, dicc(placa, as)}{bool}{}
-\tadOperacion{iterarValidas}{grilla, dicc(placa, as), conj(placa)}{bool}{}
+
+\tadOperacion{asValidos?}{grilla, dicc(placa, as)}{bool}{}
+\tadOperacion{iterarClaves}{grilla, dicc(placa, as), conj(placa)}{bool}{}
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
 \tadOperacion{posSinObstaculos?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{iterarSinObs}{grilla, dicc(placa, as), conj(placa)}{bool}{}
@@ -131,29 +132,24 @@
 \tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
 \tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
 
-\tadAxioma{posValidas?(g, ass)}{iterarValidas(g, ass, claves(ass))}
-\tadAxioma{iterarValidas(g, ass, claves)}{
+\tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
+\tadAxioma{iterarClaves(g, ass, claves)}{
     \IF $\emptyset$?(claves) THEN true
     ELSE { 
-    \-\- \IF posValida?(g, posicion(obtener(ass, dameUno(claves)))) THEN iterarValidas(g, ass, sinUno(claves))
+    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
     \-\- ELSE false
     \-\- FI
     }
     FI 
+}
+\tadAxioma{asValido?(g, as)}{
+    posValida?(g, posicion(as)) $\land$ posSinObstaculo?(g, posicion(as)) $\land$ \\
+    sinCapturas?(as) $\land$ sinSanciones?(as)
 }
 \tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
-
-\tadAxioma{posSinObstaculos?(g, ass)}{iterarSinObs(g, ass, claves(ass))}
-\tadAxioma{iterarSinObs(g, ass, claves)}{
-    \IF $\emptyset$?(claves) THEN true
-    ELSE { 
-    \-\- \IF posSinObstaculo?(g, posicion(obtener(ass, dameUno(claves)))) THEN iterarSinObs(g, ass, sinUno(claves))
-    \-\- ELSE false
-    \-\- FI
-    }
-    FI 
-}
 \tadAxioma{posSinObstaculo?(g, pos)}{pos $\notin$ obstaculos(g)}
+\tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
+\tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
 
 \end{tad}
 
