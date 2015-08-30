@@ -95,14 +95,10 @@
 % Otras operaciones
 \tadOtrasOperaciones
 
-<<<<<<< HEAD
 \tadOperacion{posValidas?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{iterarValidas}{grilla, dicc(placa, as), conj(placa)}{bool}{}
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
 \tadOperacion{posVacias?}{grilla, dicc(placa, as)}{bool}{}
-=======
-\tadOperacion{posValidas?}{grilla, dicc(placa,as)}{bool}{}
->>>>>>> origin/master
 \tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
@@ -116,8 +112,24 @@
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
 \tadAlinearAxiomas{obstaculos(agregarObstaculo(g, p))}
 
-<<<<<<< HEAD
 \tadAlinearAxiomas{false $\oluego$ $x$ xzx xxzx zzzzzx z }
+\tadAxioma{grilla(crearCampus(g, ass))}{g}
+\tadAxioma{grilla(entraEstudiante(c, p))}{grilla(c)}
+
+\tadAxioma{grilla(entraHippie(c, p))}{grilla(c)}
+\tadAxioma{grilla(saleEstudiante(c, p))}{grilla(c)}
+\tadAxioma{grilla(movEstudiante(c, p, dir))}{grilla(c)}
+\tadAxioma{grilla(movHippie(c, p))}{grilla(c)}
+\tadAxioma{grilla(movAS(c, id))}{grilla(c)}
+
+\tadAxioma{asshole(crearCampus(g, ass))}{ass}
+\tadAxioma{asshole(entraEstudiante(c, p))}{asshole(c)}
+
+\tadAxioma{asshole(entraHippie(c, p))}{asshole(c)}
+\tadAxioma{asshole(saleEstudiante(c, p))}{asshole(c)}
+\tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
+\tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
+
 \tadAxioma{posValidas?(g, ass)}{iterarValidas(g, ass, claves(ass))}
 \tadAxioma{iterarValidas(g, ass, claves)}{
     \IF $\emptyset$?(claves) THEN true
@@ -129,25 +141,6 @@
     FI 
 }
 \tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
-=======
-\tadAxioma{grilla(crearCampus(g, ass))}{g}
-\tadAxioma{grilla(entraEstudiante(c, p))}{grilla(c)}
-
-\tadAxioma{grilla(entraHippie(c, p))}{grilla(c)}
-\tadAxioma{grilla(saleEstudiante(c, p))}{grilla(c)}
-\tadAxioma{grilla(movEstudiante(c, p, dir))}{grilla(c)}
-\tadAxioma{grilla(movHippie(c, p))}{grilla(c)}
-\tadAxioma{grilla(movAS(c, id))}{grilla(c)}
->>>>>>> origin/master
-
-\tadAxioma{asshole(crearCampus(g, ass))}{ass}
-\tadAxioma{asshole(entraEstudiante(c, p))}{asshole(c)}
-
-\tadAxioma{asshole(entraHippie(c, p))}{asshole(c)}
-\tadAxioma{asshole(saleEstudiante(c, p))}{asshole(c)}
-\tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
-\tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
-
 
 \end{tad}
 
