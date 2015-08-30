@@ -76,9 +76,9 @@
 % Generadores
 \tadGeneradores
 
-\tadOperacion{crearCampus}{grilla/g, dicc(placa, as)/ass}{campus}{posValidas?(g, ass) $\land$ sinCapturas?(ass) $\land$ sinSanciones?(ass)}
-\tadOperacion{entraEstudiante}{campus/c, posicion/p}{campus}{posVacia?(c, p) $\land$ esEntrada?(c, p)}
-\tadOperacion{entraHippie}{campus/c, posicion/p}{campus}{posVacia?(c, p) $\land$ esEntrada?(c, p)}
+\tadOperacion{crearCampus}{grilla/g, dicc(placa, as)/ass}{campus}{posValidas?(g, ass) $\land$ posVacias?(g, ass) $\land$ sinCapturas?(ass) $\land$ sinSanciones?(ass)}
+\tadOperacion{entraEstudiante}{campus/c, posicion/p}{campus}{posValida?(c, p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
+\tadOperacion{entraHippie}{campus/c, posicion/p}{campus}{posValida?(c, p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
 \tadOperacion{saleEstudiante}{campus/c, posicion/p}{campus}{esEstudiante?(c, p) $\land$ esEntrada?(c, p)}
 \tadOperacion{movEstudiante}{campus/c, posicion/p, direccion/dir}{campus}{esEstudiante?(c, p) $\land$ dirValida?(c, p, dir)}
 \tadOperacion{movHippie}{campus/c, posicion/p}{campus}{esHippie?(c, p)}
@@ -96,6 +96,9 @@
 \tadOtrasOperaciones
 
 \tadOperacion{posValidas?}{grilla, dicc(placa, as)}{bool}{}
+\tadOperacion{iterarValidas}{grilla, dicc(placa, as), conj(placa)}{bool}{}
+\tadOperacion{posValida?}{grilla, posicion}{bool}{}
+\tadOperacion{posVacias?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
@@ -108,12 +111,18 @@
 % Axiomas
 \tadAxiomas[\paratodo{bool}{x,y}]
 
-\tadAlinearAxiomas{false $\oluego$ $x$}
-\tadAxioma{$\neg$ true}{false}
-\tadAxioma{$\neg$ false}{true}
-
-\tadAxioma{true $\lor$ $x$}{true}
-\tadAxioma{false $\lor$ $x$}{$x$}
+\tadAlinearAxiomas{false $\oluego$ $x$ xzx xxzx zzzzzx z }
+\tadAxioma{posValidas?(g, ass)}{iterarValidas(g, ass, claves(ass))}
+\tadAxioma{iterarValidas(g, ass, claves)}{
+    \IF $\emptyset$?(claves) THEN true
+    ELSE { 
+    \-\- \IF posValida?(g, posicion(obtener(ass, dameUno(claves)))) THEN iterarValidas(g, ass, sinUno(claves))
+    \-\- ELSE false
+    \-\- FI
+    }
+    FI 
+}
+\tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
 
 \tadAxioma{true $\land$ $x$}{$x$}
 \tadAxioma{false $\land$ $x$}{false}
