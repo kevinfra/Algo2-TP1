@@ -71,7 +71,7 @@
 
 \tadIgualdadObservacional{c1}{c2}{campus}{$(grilla(c1) \igobs grilla(c2))\ \land$\\ $(asshole(c1) \igobs asshole(c2))\ \land$\\ $(estudiantes(c1) \igobs estudiantes(c2)) \ \land$\\ $(hippies(c1) \igobs hippies(c2))$}
 
-\tadAlinearFunciones{entraEstudiante}{campus/c, posicion/p, direccion/dir}{}
+\tadAlinearFunciones{posSinObstaculo?}{campus/c, posicion/p, direccion/dir}{}
 
 % Generadores
 \tadGeneradores
@@ -99,11 +99,10 @@
 \tadOperacion{asValidos?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{iterarClaves}{grilla, dicc(placa, as), conj(placa)}{bool}{}
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
-\tadOperacion{posSinObstaculos?}{grilla, dicc(placa, as)}{bool}{}
-\tadOperacion{iterarSinObs}{grilla, dicc(placa, as), conj(placa)}{bool}{}
 \tadOperacion{posSinObstaculo?}{grilla, posicion}{bool}{}
 \tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
+\tadOperacion{posNoRepetida?}{ass, conj(placa), posicion}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
 \tadOperacion{esEntrada?}{campus, posicion}{bool}{}
 \tadOperacion{esEstudiante?}{campus, posicion}{bool}{}
@@ -136,7 +135,7 @@
 \tadAxioma{iterarClaves(g, ass, claves)}{
     \IF $\emptyset$?(claves) THEN true
     ELSE { 
-    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
+    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
     \-\- ELSE false
     \-\- FI
     }
@@ -150,6 +149,14 @@
 \tadAxioma{posSinObstaculo?(g, pos)}{pos $\notin$ obstaculos(g)}
 \tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
 \tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
+\tadAxioma{posNoRepetida?(ass, claves, pos)}{
+    \IF $\emptyset$?(claves) THEN true
+    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\
+    posNoRepetida?(ass, sinUno(claves), pos)
+    FI
+}
+
+\tadAxioma{posVacia?(c, pos)}{posSinObstaculo?(grilla(c), pos) $\land$ }
 
 \end{tad}
 
