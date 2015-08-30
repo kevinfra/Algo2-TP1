@@ -76,9 +76,9 @@
 % Generadores
 \tadGeneradores
 
-\tadOperacion{crearCampus}{grilla/g, dicc(placa, as)/ass}{campus}{posValidas?(g, ass) $\land$ posVacias?(g, ass) $\land$ sinCapturas?(ass) $\land$ sinSanciones?(ass)}
-\tadOperacion{entraEstudiante}{campus/c, posicion/p}{campus}{posValida?(c, p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
-\tadOperacion{entraHippie}{campus/c, posicion/p}{campus}{posValida?(c, p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
+\tadOperacion{crearCampus}{grilla/g, dicc(placa, as)/ass}{campus}{posValidas?(g, ass) $\land$ posSinObstaculos?(g, ass) $\land$ sinCapturas?(ass) $\land$ sinSanciones?(ass)}
+\tadOperacion{entraEstudiante}{campus/c, posicion/p}{campus}{posValida?(grilla(c), p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
+\tadOperacion{entraHippie}{campus/c, posicion/p}{campus}{posValida?(grilla(c), p) $\land$ posVacia?(c, p) $\land$ esEntrada?(c, p)}
 \tadOperacion{saleEstudiante}{campus/c, posicion/p}{campus}{esEstudiante?(c, p) $\land$ esEntrada?(c, p)}
 \tadOperacion{movEstudiante}{campus/c, posicion/p, direccion/dir}{campus}{esEstudiante?(c, p) $\land$ dirValida?(c, p, dir)}
 \tadOperacion{movHippie}{campus/c, posicion/p}{campus}{esHippie?(c, p)}
@@ -98,7 +98,9 @@
 \tadOperacion{posValidas?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{iterarValidas}{grilla, dicc(placa, as), conj(placa)}{bool}{}
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
-\tadOperacion{posVacias?}{grilla, dicc(placa, as)}{bool}{}
+\tadOperacion{posSinObstaculos?}{grilla, dicc(placa, as)}{bool}{}
+\tadOperacion{iterarSinObs}{grilla, dicc(placa, as), conj(placa)}{bool}{}
+\tadOperacion{posSinObstaculo?}{grilla, posicion}{bool}{}
 \tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
@@ -110,9 +112,8 @@
 
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
-\tadAlinearAxiomas{obstaculos(agregarObstaculo(g, p))}
+\tadAlinearAxiomas{asshole(movEstudiante(c, p, dir))}
 
-\tadAlinearAxiomas{false $\oluego$ $x$ xzx xxzx zzzzzx z }
 \tadAxioma{grilla(crearCampus(g, ass))}{g}
 \tadAxioma{grilla(entraEstudiante(c, p))}{grilla(c)}
 
@@ -141,6 +142,18 @@
     FI 
 }
 \tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
+
+\tadAxioma{posSinObstaculos?(g, ass)}{iterarSinObs(g, ass, claves(ass))}
+\tadAxioma{iterarSinObs(g, ass, claves)}{
+    \IF $\emptyset$?(claves) THEN true
+    ELSE { 
+    \-\- \IF posSinObstaculo?(g, posicion(obtener(ass, dameUno(claves)))) THEN iterarSinObs(g, ass, sinUno(claves))
+    \-\- ELSE false
+    \-\- FI
+    }
+    FI 
+}
+\tadAxioma{posSinObstaculo?(g, pos)}{pos $\notin$ obstaculos(g)}
 
 \end{tad}
 
