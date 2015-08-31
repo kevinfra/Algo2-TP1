@@ -95,7 +95,6 @@
 % Otras operaciones
 \tadOtrasOperaciones
 
-
 \tadOperacion{asValidos?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{iterarClaves}{grilla, dicc(placa, as), conj(placa)}{bool}{}
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
@@ -104,10 +103,11 @@
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
 \tadOperacion{posNoRepetida?}{ass, conj(placa), posicion}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
-\tadOperacion{esEntrada?}{campus, posicion}{bool}{}
-\tadOperacion{esEstudiante?}{campus, posicion}{bool}{}
-\tadOperacion{dirValida?}{campus, posicion, direccion}{bool}{}
+\tadOperacion{posSinAS?}{campus, posicion}{bool}{}
 \tadOperacion{esHippie?}{campus, posicion}{bool}{}
+\tadOperacion{esEstudiante?}{campus, posicion}{bool}{}
+\tadOperacion{esEntrada?}{campus, posicion}{bool}{}
+\tadOperacion{dirValida?}{campus, posicion, direccion}{bool}{}
 \tadOperacion{esAS?}{campus, placa}{bool}{}
 
 % Axiomas
@@ -156,7 +156,7 @@
     FI
 }
 
-\tadAxioma{posVacia?(c, pos)}{posSinObstaculo?(grilla(c), pos) $\land$ }
+\tadAxioma{posVacia?(c, pos)}{posSinObstaculo?(grilla(c), pos) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
 \end{tad}
 
