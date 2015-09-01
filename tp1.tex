@@ -14,6 +14,7 @@
 \newcommand{\f}[1]{\text{#1}}
 \renewcommand{\paratodo}[2]{$\forall~#2$: #1}
 
+
 \sloppy
 
 \hypersetup{%
@@ -109,6 +110,14 @@
 \tadOperacion{dirValida?}{campus, posicion, direccion}{bool}{}
 \tadOperacion{esHippie?}{campus, posicion}{bool}{}
 \tadOperacion{esAS?}{campus, placa}{bool}{}
+\tadOperacion{posicionAs}{placa, campus}{posicion}{}
+\tadOperacion{hayHippiesEnCampus}{campus}{bool}{}
+\tadOperacion{moverseAEntradaMasCercana}{placa,campus}{dicc(placa,as)}{}
+\tadOperacion{nuevaPosicion}{posicion, conj(posicion),campus}{posicion}{}
+\tadOperacion{entradasMasCercanas}{posicion,grilla}{conj(posicion)}{}
+\tadOperacion{distancia}{nat,nat}{nat}{}
+\tadOperacion{estaVaciaPos?}{posicion,campus}{bool}{}
+
 
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
@@ -125,11 +134,55 @@
 
 \tadAxioma{asshole(crearCampus(g, ass))}{ass}
 \tadAxioma{asshole(entraEstudiante(c, p))}{asshole(c)}
-
 \tadAxioma{asshole(entraHippie(c, p))}{asshole(c)}
 \tadAxioma{asshole(saleEstudiante(c, p))}{asshole(c)}
 \tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
 \tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
+\tadAxioma{asshole(movAss(c, p))}{ \IF $\pi_2$(Obtener(p,asshole(c))) $\geq3$ 
+	THEN asshole(c)
+	ELSE {
+		\- \IF $\neg$hayHippiesEnCampus(c) THEN moverseAEntradaMasCercana(p,c)
+		ELSE perseguirHippiesCercanos(p,c)
+		FI
+	}
+	FI
+}
+
+\tadAxioma{posicionAs(p,c)}{$pi_1$(Obtener(p,asshole(c)))}
+
+\tadAxioma{hayHippiesEnCampus(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
+
+\tadAxioma{moverseAEntradaMasCercana(p,c)}{\IF nuevaPosicion(posicionAs(p,c), entradasMasCercanas(posicionAs(p,c),grilla(c)))= posicionAs(p,c)
+	THEN asshole(c)
+	ELSE moverseYActualizar(p,nuevaPosicion(posicionAs(p,c), entradasMasCercanas(posicionAs(p,c),grilla(c))),c)
+	FI
+}
+
+\tadAxioma{nuevaPosicion(posactual,conjpos,c)}{\IF $\emptyset$?(conjpos) THEN posactual
+	ELSE {
+	\IF estaVaciaPos?(DameUno(conjpos),c) THEN DameUno(conjpos)
+		ELSE nuevaPosicion(posactual, SinUno(conjpos),c)
+		FI	
+	}
+	FI
+}
+
+\tadAxioma{entradasMasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0) 
+	THEN Ag(($\pi_1$(pos), alto(g)-1) $\emptyset$)
+	ELSE {
+		\IF distancia($\pi_2$(pos), 0) $<$ distancia($\pi_2$(pos), alto(g)-1)
+		THEN Ag(($\pi_1$(pos), 0) $\emptyset$)
+		ELSE Ag(($\pi_2$(pos), alto(g)-1), Ag(($\pi_1$(pos), 0) $\emptyset$))
+		FI
+	}
+	FI
+}
+
+\tadAxioma{distancia(n,m)}{\IF $m-n < 0$ THEN $-(m-n)$ ELSE $m-n$ FI
+}
+
+\tadAxioma{estaVaciaPos?(pos,c)}{pos $\not\in$ Hippies(c) $\land$ pos $\not\in$ Estudiantes(c) $\land$ pos $\not\in$ Asshole(c) $\land$ pos $\not\in$ Obstaculos(grilla(c))
+}
 
 \tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
 \tadAxioma{iterarClaves(g, ass, claves)}{
@@ -158,7 +211,10 @@
 
 \tadAxioma{posVacia?(c, pos)}{posSinObstaculo?(grilla(c), pos) $\land$ }
 
+
+
 \end{tad}
+
 
 \section{TAD \tadNombre{Grilla}}
 
