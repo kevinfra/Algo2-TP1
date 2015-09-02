@@ -96,6 +96,7 @@
 % Otras operaciones
 \tadOtrasOperaciones
 
+
 \tadOperacion{asValidos?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{iterarClaves}{grilla, dicc(placa, as), conj(placa)}{bool}{}
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
@@ -104,11 +105,10 @@
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
 \tadOperacion{posNoRepetida?}{ass, conj(placa), posicion}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
-\tadOperacion{posSinAS?}{campus, posicion}{bool}{}
-\tadOperacion{esHippie?}{campus, posicion}{bool}{}
-\tadOperacion{esEstudiante?}{campus, posicion}{bool}{}
 \tadOperacion{esEntrada?}{campus, posicion}{bool}{}
+\tadOperacion{esEstudiante?}{campus, posicion}{bool}{}
 \tadOperacion{dirValida?}{campus, posicion, direccion}{bool}{}
+\tadOperacion{esHippie?}{campus, posicion}{bool}{}
 \tadOperacion{esAS?}{campus, placa}{bool}{}
 \tadOperacion{posicionAs}{placa, campus}{posicion}{}
 \tadOperacion{hayHippiesEnCampus}{campus}{bool}{}
@@ -117,7 +117,16 @@
 \tadOperacion{entradasMasCercanas}{posicion,grilla}{conj(posicion)}{}
 \tadOperacion{distancia}{nat,nat}{nat}{}
 \tadOperacion{estaVaciaPos?}{posicion,campus}{bool}{}
-
+\tadOperacion{moverseYActualizarAs}{placa,posicion,campus}{dicc(placa,as)}{}
+\tadOperacion{actualizarAs}{posicion,dicc(placa,as),campus}{dicc(placa,as)}{}
+\tadOperacion{hayHippiesAtrapados}{posicion,campus}{bool}{}
+\tadOperacion{posConHippies}{conj(posicion),conj(posicion)}{conj(posicion)}{}
+\tadOperacion{posicionesContiguas}{posicion}{conj(posicion)}{}
+\tadOperacion{posValidasCont}{conj(posicion),grilla}{conj(posicion)}{}
+\tadOperacion{conjuntoPosAs}{conj(placa),dicc(placa,as)}{conj(posicion)}{}
+\tadOperacion{revisarHippies}{conj(posicion),campus}{bool}{}
+\tadOperacion{esAtrapadoH?}{posicion,conj(posicion),campus}{bool}{}
+\tadOperacion{hayPosVacia?}{conj(posicion),campus}{bool}{}
 
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
@@ -181,7 +190,7 @@
 \tadAxioma{distancia(n,m)}{\IF $m-n < 0$ THEN $-(m-n)$ ELSE $m-n$ FI
 }
 
-\tadAxioma{estaVaciaPos?(pos,c)}{pos $\not\in$ Hippies(c) $\land$ pos $\not\in$ Estudiantes(c) $\land$ pos $\not\in$ Asshole(c) $\land$ pos $\not\in$ Obstaculos(grilla(c))
+\tadAxioma{estaVaciaPos?(pos,c)}{pos $\not\in$ Hippies(c) $\land$ pos $\not\in$ Estudiantes(c) $\land$ pos $\not\in$ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) $\land$ pos $\not\in$ Obstaculos(grilla(c))
 }
 
 \tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
@@ -209,8 +218,94 @@
     FI
 }
 
-\tadAxioma{posVacia?(c, pos)}{posSinObstaculo?(grilla(c), pos) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
+\tadAxioma{moverseYActualizarAs(p,nuevapos,c)}{
+actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$(Obtener(p,asshole(c)))),asshole(c)),c)
+}
 
+\tadAxioma{actualizarAs(pos,dic,c)}{
+	\IF $\neg$ hayHippiesAtrapados(pos,c) $land$ $\neg$ hayEstudiantesAtrapados(pos,c) THEN dic
+	ELSE {
+		\IF hayHippiesAtrapados(pos,c) $\land$ $\neg$ hayEstudiantesAtrapados(pos,c) THEN premiarAs(pos,claves(dic),c)
+		ELSE{
+			\IF	$\neg$ hayHippiesAtrapados(pos,c) $land$ hayEstudiantesAtrapados(pos,c) THEN sancionarAs(pos,claves(dic),c)
+			ELSE premiarYSancionarAs(pos,claves(dic),c)
+			FI
+		}
+		FI
+	}
+	FI
+}
+
+\tadAxioma{hayHippiesAtrapados(pos,c)}{
+	\IF $\emptyset$?(posConHippies(posValidasCont(posicionesContiguas(pos),grilla(c)),Hippies(c))) THEN false
+	ELSE revisarHippies(posConHippies(posValidasCont(posicionesContiguas(pos),grilla(c)),Hippies(c)),Hippies(c)),c)
+	FI
+}
+
+\tadAxioma{posConHippies(poscont,conjhippies)}{
+	\IF $\emptyset$?(poscont) THEN $\emptyset$
+	ELSE{
+		\IF DameUno(poscont) $\in$ conjhippies	THEN Ag(DameUno(poscont),posConHippies(SinUno(poscont),conjhippies))
+		ELSE posConHippies(SinUno(poscont),conjhippies)
+		FI
+	}
+	FI
+}
+
+\tadAxioma{posicionesContiguas(pos)}{
+	Ag(($\pi_1$(pos)+1,$\pi_2$(pos)), Ag(($\pi_1$(pos)-1,$\pi_2$(pos)), Ag(($\pi_1$(pos),$\pi_2$(pos)+1), Ag(($\pi_1$(pos),$\pi_2$(pos)-1), $\emptyset$)
+}
+
+\tadAxioma{posValidasCont(conj,g)}{
+	\IF $\emptyset$?(conj) THEN $\emptyset$
+	ELSE{
+		\IF posValida?(g,DameUno(conj)) THEN Ag(DameUno(conj),posValidasCont(g,SinUno(conj)))
+		ELSE posValidasCont(g,SinUno(conj))
+		FI
+	}
+	FI
+}
+
+\tadAxioma{conjuntoPosAs(conjclaves,dic)}{
+	\IF $\emptyset$?(conjclaves) THEN $\emptyset$
+	ELSE Ag($\pi_1$(Obtener(DameUno(conjclaves),dic)),conjuntoPosAs(SinUno(conjclaves),dic)
+	FI
+}
+
+\tadAxioma{revisarHippies(conjpos,c)}{
+	\IF $\emptyset$?(conjpos) THEN false
+	ELSE{
+		\IF esAtrapadoH?(DameUno(conjpos), posValidasCont(posicionesContiguas(DameUno(conjpos)),grilla(c)),c)
+		THEN true
+		ELSE revisarHippies(SinUno(conjpos),c)
+		FI
+	}
+	FI
+}
+
+\tadAxioma{esAtrapadoH?(posh,conjcont,c)}{
+	\IF hayPosVacia?(conjcont,c) THEN false
+	ELSE{
+		\IF DameUno(conjcont) $\in$ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) THEN true
+		ELSE esAtrapadoH?(posh,SinUno(conjcont),c)
+		FI	
+	}
+	FI
+}
+
+\tadAxioma{hayPosVacia?(conjpos,c)}{
+	\IF $\emptyset$?(conjpos) THEN false
+	ELSE{
+		\IF estaVaciaPos?(DameUno(conjpos)) THEN true
+		ELSE hayPosVacia?(conjpos,c)
+		FI	
+	}
+	FI
+}
+
+
+% Me molestaba que aparezca y lo comenté, revisen si sirve esta funcion!!!!
+%\tadAxioma{posVacia?(c, pos)}{posSinObstaculo?(grilla(c), pos) $\land$ }
 
 
 \end{tad}
