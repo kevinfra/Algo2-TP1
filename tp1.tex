@@ -141,6 +141,12 @@
 \tadOperacion{revisarEstudiantes}{conj(estudiantes),campus}{bool}{}
 \tadOperacion{esAtrapadoE?}{posicion,conj(posicion),campus}{bool}{}
 
+\tadOperacion{premiarAs}{conj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c)}
+\tadOperacion{rodeo}{conj(posicion),campus}{conj(posicion)}{}
+\tadOperacion{placaDelAs}{posicion/pos,conj(placa)/conjplacas,dicc(placa,as)/dic}{placa}{pos $\in$ conjuntoPosAs(conjplacas,dic)}
+\tadOperacion{asParaPremiar}{conj(posicion),campus}{conj(placa)}{}
+\tadOperacion{hAtrapados}{conj(posicion),campus}{conj(posicion)}{}
+
 
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
@@ -370,7 +376,45 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 	FI
 }
 
+\tadAxioma{premiarAs(conjAs,c)}{
+	\IF $\emptyset$?(conjAs) THEN asshole(c)
+	ELSE definir(DameUno(conjAs), ($\pi_1$(Obtener(DameUno(conjAs),asshole(c)) , $\pi_2$(Obtener(DameUno(conjAs),asshole(c))+1,$\pi_3$(Obtener(DameUno(conjAs),asshole(c)), premiarAs(SinUno(conjAs),c))
+	FI
+}
 
+\tadAxioma{rodeo(conj,c)}{
+	\IF $\emptyset$?(conjAs) THEN $\emptyset$
+	ELSE posValidaCont(posContigua(DameUno(conj)),grilla(c)) $\cup$ rodeo(SinUno(conj),c)
+	FI
+}
+
+\tadAxioma{placaDelAs(pos,conjplacas,dic)}{
+	\IF $\pi_1$(Obtener(DameUno(conjplacas),dic) $=$ pos THEN DameUno(conjplacas)
+	ELSE placaDelAs(pos,SinUno(conjplacas),dic)
+	FI
+}
+
+\tadAxioma{asParaPremiar(conjtodo,c)}{
+	\IF $\emptyset$?(conjAs) THEN $\emptyset$
+	ELSE{
+		\IF DameUno(conjtodo) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c))
+		THEN Ag(placaDelAs(DameUno(conjtodo),claves(asshole(c),asshole(c)),asParaPremiar(SinUno(conjtodo),c))
+		ELSE asParaPremiar(SinUno(conjtodo),c)
+		FI
+	}
+	FI
+}
+
+\tadAxioma{hAtrapados(conjH,c)}{
+	\IF $\emptyset$?(conjH) THEN $\emptyset$
+	ELSE{
+		\IF esAtrapadoH(DameUno(conjH), posValidasCont(posContiguas(DameUno(conjH)),grilla(c)), c)
+		THEN Ag(DameUno(conjH), hAtrapados(SinUno(conjH),c)
+		ELSE hAtrapados(SinUno(conjH),c)
+		FI
+	}
+	FI
+}
 
 \end{tad}
 
