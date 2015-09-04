@@ -141,7 +141,7 @@
 \tadOperacion{revisarEstudiantes}{conj(estudiantes),campus}{bool}{}
 \tadOperacion{esAtrapadoE?}{posicion,conj(posicion),campus}{bool}{}
 
-\tadOperacion{premiarAs}{conj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c)}
+\tadOperacion{premiarAs}{conj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
 \tadOperacion{rodeo}{conj(posicion),campus}{conj(posicion)}{}
 \tadOperacion{placaDelAs}{posicion/pos,conj(placa)/conjplacas,dicc(placa,as)/dic}{placa}{pos $\in$ conjuntoPosAs(conjplacas,dic)}
 \tadOperacion{asParaPremiar}{conj(posicion),campus}{conj(placa)}{}
@@ -150,6 +150,16 @@
 \tadOperacion{capturadoH}{posicion,campus}{bool}{}
 \tadOperacion{capturadoE}{posicion,campus}{bool}{}
 \tadOperacion{estaEnEntrada?}{posicion,grilla}{bool}{}
+
+\tadOperacion{distanciaTaxista}{posicion,posicion}{nat}{}
+\tadOperacion{menorDistanciaAP}{posicion/pos,con(posicion)/conjunto}{nat}{$\#$conjunto$>0$}
+\tadOperacion{personasCercanas}{posicion,conj(posicion)}{conj(posicion)}{}
+\tadOperacion{sancionarAs}{conj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
+\tadOperacion{eAtrapados}{conj(posicion),campus}{conj(posicion)}{}
+\tadOperacion{premiarYSancionar}{conj((placa,bool)),campus}{dicc(placa,as)}{}
+%ojo con la funcion de arriba, false -> premiar, true-> sancionar
+
+%\tadOperacion{posParaMoverse}{posicion,conj(posicion),campus}{conj(posicion)}{}
 
 
 % Axiomas
@@ -428,6 +438,50 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 
 \tadAxioma{estaEnEntrada?(posE,g)}{ $\pi_2$(posE) = 0 $\lor$ $\pi_2$(posE) = altura(g)-1
 }
+
+\tadAxioma{distanciaTaxista(pos,posPers)}{ distancia($\pi_1$(pos),$\pi_1$(posPers)) - distancia($\pi_2$(pos),$\pi_2$(posPers))
+}
+
+\tadAxioma{menorDistanciaAP(pos,conj)}{ \IF $\#$(conj) $=1$ THEN distanciaTaxista(pos,DameUno(conj))
+	ELSE min(distanciaTaxista(pos,DameUno(conj)),menorDistanciaAP(pos,conj))
+	FI
+}
+
+\tadAxioma{personasCercanas(pos,conj)}{ \IF $\emptyset$?(conj) THEN $\emptyset$
+	ELSE{
+		\IF distanciaTaxista(pos,DameUno(conj))$=$menorDistanciaAP(pos,conj) THEN Ag(DameUno(conjH),personasCercanas(pos,SinUno(conj)))
+		ELSE personasCercanas(pos,SinUno(conj))
+		FI
+	}
+	FI
+}
+
+\tadAxioma{sancionarAs(conjAs,c)}{ \IF $\emptyset$?(conjAs) THEN asshole(c)
+	ELSE definir(DameUno(conjAs), ($\pi_1$(Obtener(DameUno(conjAs),asshole(c))),$\pi_2$(Obtener(DameUno(conjAs),asshole(c))),$\pi_3$(Obtener(DameUno(conjAs),asshole(c)))$+1$), sancionarAs(SinUno(conjAs),c))
+	FI
+}
+
+\tadAxioma{eAtrapados(conjE,c)}{ \IF $\emptyset$?(conjAs) THEN $\emptyset$
+	ELSE{
+		\IF esAtrapadoE?(DameUno(conjE),posicionesContiguas(DameUno(conjE),grilla(c)),c)
+		THEN Ag(DameUno(conjE),eAtrapados(SinUno(conjE),c))
+		ELSE eAtrapados(SinUno(conjE),c)
+		FI
+	}
+	FI
+}
+
+%false-> premia / true -> sanciona
+\tadAxioma{premiarYSancionar(conjP,c)}{ \IF $\emptyset$?(conjAs) THEN asshole(c)
+	ELSE{
+		\IF $\pi_2$(DameUno(conjP))$=$false
+		THEN definir(DameUno(conjP), ($\pi_1$(Obtener(DameUno(conjP),asshole(c)) , $\pi_2$(Obtener(DameUno(conjP),asshole(c))+1,$\pi_3$(Obtener(DameUno(conjP),asshole(c)), premiarYSancionar(SinUno(conjP),c))
+		ELSE definir(DameUno(conjP), ($\pi_1$(Obtener(DameUno(conjP),asshole(c)) , $\pi_2$(Obtener(DameUno(conjP),asshole(c)),$\pi_3$(Obtener(DameUno(conjP),asshole(c))+1, premiarYSancionar(SinUno(conjP),c))
+		FI
+	}
+	FI
+}
+
 
 \end{tad}
 
