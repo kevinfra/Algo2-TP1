@@ -189,6 +189,31 @@
 \tadAxioma{hippies(movHippie(c, pos))}{hippies(c) - hippiesCapturados(c, nuevaPosHippie(c, pos))}
 \tadAxioma{hippies(movAS(c, id))}{hippies(c) - hipiesCapturados(c, nuevaPosAS(c, id))}
 
+\tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
+\tadAxioma{iterarClaves(g, ass, claves)}{
+    \IF $\emptyset$?(claves) THEN true
+    ELSE { 
+    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
+    \-\- ELSE false
+    \-\- FI
+    }
+    FI 
+}
+\tadAxioma{asValido?(g, as)}{
+    posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\
+    sinCapturas?(as) $\land$ sinSanciones?(as)
+}
+\tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
+\tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
+\tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
+\tadAxioma{posNoRepetida?(ass, claves, pos)}{
+    \IF $\emptyset$?(claves) THEN true
+    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\
+    posNoRepetida?(ass, sinUno(claves), pos)
+    FI
+}
+
+\tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 \tadAxioma{posAS(c, p)}{$pi_1$(Obtener(p,asshole(c)))}
 
 \tadAxioma{hayHippies?(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
@@ -221,31 +246,6 @@
 
 \tadAxioma{distancia(n,m)}{\IF $m-n < 0$ THEN $-(m-n)$ ELSE $m-n$ FI}
 
-\tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
-\tadAxioma{iterarClaves(g, ass, claves)}{
-    \IF $\emptyset$?(claves) THEN true
-    ELSE { 
-    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
-    \-\- ELSE false
-    \-\- FI
-    }
-    FI 
-}
-\tadAxioma{asValido?(g, as)}{
-    posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\
-    sinCapturas?(as) $\land$ sinSanciones?(as)
-}
-\tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
-\tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
-\tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
-\tadAxioma{posNoRepetida?(ass, claves, pos)}{
-    \IF $\emptyset$?(claves) THEN true
-    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\
-    posNoRepetida?(ass, sinUno(claves), pos)
-    FI
-}
-
-\tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
 
 
