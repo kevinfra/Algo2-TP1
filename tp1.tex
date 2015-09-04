@@ -232,7 +232,45 @@
 
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
+\tadAxioma{posSinAS?(c, p)}{ \IF p $\notin$ conjuntoPosAs(claves(asshole(c),asshole(c)))
+    THEN true
+    ELSE {
+        false
+    }
+    FI
+}
 
+\tadAxioma{esHippie?(c, p)}{ \IF p $\in$ hippies(c)
+    THEN true
+    ELSE {
+        false
+    }
+    FI
+}
+
+\tadAxioma{esEstudiante?(c, p)}{ \IF p $\in$ estudiantes(c)
+    THEN true
+    ELSE {
+        false
+    }
+    FI
+}
+
+\tadAxioma{esEntrada?(c,p)}{ \IF $\pi_2$(p) = 0 $\land$ $\pi_2$(p) = alto(grilla(c)) - 1 
+    THEN true
+    ELSE {
+       false
+    }
+    FI
+}
+
+\tadAxioma{esAS?(c, p)}{ \IF def?(p,asshole(c))
+    THEN true
+    ELSE {
+        false
+    }
+    FI
+}
 
 \end{tad}
 
