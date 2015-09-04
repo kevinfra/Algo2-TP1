@@ -204,6 +204,17 @@
     FI
 }
 
+\tadAxioma{estudiantesFalopeados(c, pos)}{buscarFalopeados(c, posContiguas(c, pos))}
+\tadAxioma{buscarFalopeados(c, contiguas}{
+    \IF $\emptyset$?(contiguas) THEN $\emptyset$
+    ELSE {
+        \IF seConvierteEnHippie(c, dameUno(contiguas)) THEN Ag(dameUno(contiguas), \\buscarFalopeados(c, sinUno(contiguas)))
+        ELSE buscarFalopeados(c, sinUno(contiguas))
+        FI
+    }
+    FI
+}
+
 \tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
 \tadAxioma{iterarClaves(g, ass, claves)}{
     \IF $\emptyset$?(claves) THEN true
@@ -215,16 +226,14 @@
     FI 
 }
 \tadAxioma{asValido?(g, as)}{
-    posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\
-    sinCapturas?(as) $\land$ sinSanciones?(as)
+    posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\sinCapturas?(as) $\land$ sinSanciones?(as)
 }
 \tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
 \tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
 \tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
 \tadAxioma{posNoRepetida?(ass, claves, pos)}{
     \IF $\emptyset$?(claves) THEN true
-    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\
-    posNoRepetida?(ass, sinUno(claves), pos)
+    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\posNoRepetida?(ass, sinUno(claves), pos)
     FI
 }
 
