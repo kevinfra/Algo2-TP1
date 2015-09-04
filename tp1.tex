@@ -121,6 +121,8 @@
 \tadOperacion{entradasMasCercanas}{posicion,grilla}{conj(posicion)}{}
 \tadOperacion{distancia}{nat,nat}{nat}{}
 \tadOperacion{seConvierteEnHippie?}{campus, posicion}{bool}{}
+\tadOperacion{cantHippiesAdyacentes}{campus, posicion}{bool}{}
+\tadOperacion{contarHippies}{campus, conj(posicion)}{nat}{}
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
 \tadOperacion{nuevaPosHippie}{campus, posicion}{posicion}{}
 \tadOperacion{posQueAcercan}{campus, posicion, conj(posicion)}{conj(posicion)}{}
@@ -191,6 +193,16 @@
 }
 \tadAxioma{hippies(movHippie(c, pos))}{hippies(c) - hippiesCapturados(c, nuevaPosHippie(c, pos))}
 \tadAxioma{hippies(movAS(c, id))}{hippies(c) - hipiesCapturados(c, nuevaPosAS(c, id))}
+
+\tadAxioma{seConvierteEnHippie?(c, pos)}{cantHippiesAdyacentes(c, pos) $\geq$ 2}
+\tadAxioma{cantHippiesAdyacentes(c, pos)}{contarHippies(c, posContiguas(c, pos))}
+\tadAxioma{contarHippies(c, contiguas)}{
+    \IF $\emptyset$?(contiguas) THEN 0
+    ELSE{
+        contarHippies(c, sinUno(contiguas)) + \\\IF esHippie?(c, dameUno(contiguas)) THEN 1 ELSE 0 FI
+    }
+    FI
+}
 
 \tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
 \tadAxioma{iterarClaves(g, ass, claves)}{
