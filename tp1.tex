@@ -123,6 +123,9 @@
 \tadOperacion{seConvierteEnHippie?}{campus, posicion}{bool}{}
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
 \tadOperacion{nuevaPosHippie}{campus, posicion}{posicion}{}
+\tadOperacion{posQueAcercan}{campus, posicion, conj(posicion)}{conj(posicion)}{}
+\tadOperacion{posQueAcercanAUno}{campus, posicion, posicion}{conj(posicion)}{}
+\tadOperacion{iterarDirecciones}{posicion, conj(posicion)}{conj(posicion)}{}
 
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
@@ -246,7 +249,25 @@
 
 \tadAxioma{distancia(n,m)}{\IF $m-n < 0$ THEN $-(m-n)$ ELSE $m-n$ FI}
 
+\tadAxioma{posQueAcercan(c, pos, objetivos)}{
+    \IF $\emptyset$?(objetivos) THEN $\emptyset$
+    ELSE Ag(posQueAcercanAUno(c, pos, dameUno(objetivos)), \\posQueAcercan(pos, sinUno(objetivos)))
+    FI
+}
 
+\tadAxioma{posQueAcercanAUno(c, pos, objetivo)}{
+    iterarDirecciones(objetivo, posContiguas(c, pos), \\distanciaTaxista(pos, objetivo))
+}
+
+\tadAxioma{iterarDirs(objetivo, contiguas, dist)}{
+    \IF $\emptyset$?(contiguas) THEN $\emptyset$
+    ELSE {
+        \IF distanciaTaxista(objetivo, dameUno(contiguas)) < dist THEN Ag(dameUno(contiguas), \\iterarDirecciones(objetivo, sinUno(contiguas), dist))
+        ELSE iterarDirecciones(objetivo, sinUno(contiguas), dist)
+        FI
+    } 
+    FI
+}
 
 
 \end{tad}
@@ -298,4 +319,5 @@ Cuando un estudiante entra no puede ser atrapado por un AS ya que tiene libertad
 \newline estudiantesFalopeados devuelve un conunto de los estudiantes que fueron convertidos al hippismo por concecuencia de que un hippie apareciera en la posicion pasada como parametro
 \newline hippiesAdiestrados devuelve un conunto de los hippies que fueron convertidos en estudiante por concecuencia de que un estudiante apareciera en la posicion pasada como parametro
 \newline hippiesCapturados devuelve un conunto de los hippies que fueron atrapados por concecuencia de que algo se mueva o aparezca en la posicion pasada como parametro
+\newline posQueAcercan toma una posicion, que es donde estoy parado, y un conjunto de posiciones, a las cuales voy a querer acercarme. Lo que devuelve es un conjunto de posiciones contiguas que se encuentran a menor distancia del objetivo que la posicion en la que estoy parado
 \end{document}
