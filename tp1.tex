@@ -152,6 +152,43 @@
     FI
 }
 
+\tadAxioma{estudiantes(crearCampus(g, ass))}{$\emptyset$}
+\tadAxioma{estudiantes(entraEstudiante(c, pos))}{
+    \IF seConvierteEnHippie?(c, pos) THEN estudiantes(c)
+    ELSE Ag(pos, estudiantes(c)
+    FI
+}
+\tadAxioma{estudiantes(entraHippie(c, pos))}{estudiantes(c) - estudiantesFalopeados(c, pos)}
+\tadAxioma{estudiantes(saleEstudiante(c, pos))}{estudiantes(c) - \{pos\}}
+\tadAxioma{estudiantes(movEstudiante(c, ini, fin))}{
+    \IF seConvierteEnHippie?(c, fin) THEN estudiantes(c) - \{ini\} 
+    ELSE Ag(fin, estudiantes(c) - \{ini\}) 
+    FI
+}
+\tadAxioma{estudiantes(movHippie(c, pos))}{
+    % saber a donde se mueve el hippie
+    % preguntar a quien convierte en hippies en esa nueva posicion y restarlos de estudiantes(c)
+    % preguntar a quien acorrala el hippie ceva pos y restarlos tambien
+    estudiantes(c) - estudiantesFalopeados(c, nuevaPosHippie(c, pos)) 
+}
+\tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c)}
+
+\tadAxioma{hippies(crearCampus(g, ass))}{$\emptyset$}
+\tadAxioma{hippies(entraEstudiante(c, pos))}{hippies(c) - hippiesAdiestrados(c, pos) - hippiesCapturados(c, pos)}
+\tadAxioma{hippies(entraHippie(c, pos))}{
+    \IF capturadoH?(c, pos) THEN hippies(c) - hippiesCapturados(c, pos)
+    ELSE Ag(pos, hippies(c) - hippiesCapturados(c, pos)) 
+    FI
+}
+\tadAxioma{hippies(saleEstudiante(c, pos))}{hippies(c)}
+\tadAxioma{hippies(movEstudiante(c, ini, fin))}{
+    \IF seConvierteEnHippie?(c, fin) THEN Ag(fin, hippies(c) - hippiesCapturados(c, fin))
+    ELSE hippies(c) - hippiesCapturados(c, fin)
+    FI
+}
+\tadAxioma{hippies(movHippie(c, pos))}{hippies(c) - hippiesCapturados(c, nuevaPosHippie(c, pos))}
+\tadAxioma{hippies(movAS(c, id))}{hippies(c) - hipiesCapturados(c, nuevaPosAS(c, id))}
+
 \tadAxioma{posAS(c, p)}{$pi_1$(Obtener(p,asshole(c)))}
 
 \tadAxioma{hayHippies?(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
@@ -183,25 +220,6 @@
 }
 
 \tadAxioma{distancia(n,m)}{\IF $m-n < 0$ THEN $-(m-n)$ ELSE $m-n$ FI}
-
-\tadAxioma{estudiantes(crearCampus(g, ass))}{$\emptyset$}
-\tadAxioma{estudiantes(entraEstudiante(c, pos))}{
-    \IF seConvierteEnHippie?(c, pos) THEN estudiantes(c)
-    ELSE Ag(pos, estudiantes(c)
-    FI
-}
-\tadAxioma{estudiantes(entraHippie(c, pos))}{estudiantes(c) - estudiantesFalopeados(c, pos)}
-\tadAxioma{estudiantes(saleEstudiante(c, pos))}{estudiantes(c) - \{pos\}}
-\tadAxioma{estudiantes(movEstudiante(c, ini, fin))}{
-    \IF seConvierteEnHippie?(c, fin) THEN estudiantes(c) - \{ini\} ELSE Ag(fin, estudiantes(c) - \{ini\}) FI
-}
-\tadAxioma{estudiantes(movHippie(c, pos))}{
-    % saber a donde se mueve el hippie
-    % preguntar a quien convierte en hippies en esa nueva posicion y restarlos de estudiantes(c)
-    % preguntar a quien acorrala el hippie ceva pos y restarlos tambien
-    estudiantes(c) - estudiantesFalopeados(c, nuevaPosHippie(c, pos)) 
-}
-\tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c)}
 
 \tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
 \tadAxioma{iterarClaves(g, ass, claves)}{
@@ -278,4 +296,6 @@
 
 Cuando un estudiante entra no puede ser atrapado por un AS ya que tiene libertad de movimiento. Puede salir por la entrada.
 \newline estudiantesFalopeados devuelve un conunto de los estudiantes que fueron convertidos al hippismo por concecuencia de que un hippie apareciera en la posicion pasada como parametro
+\newline hippiesAdiestrados devuelve un conunto de los hippies que fueron convertidos en estudiante por concecuencia de que un estudiante apareciera en la posicion pasada como parametro
+\newline hippiesCapturados devuelve un conunto de los hippies que fueron atrapados por concecuencia de que algo se mueva o aparezca en la posicion pasada como parametro
 \end{document}
