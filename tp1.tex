@@ -125,6 +125,14 @@
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
 \tadOperacion{nuevaPosHippie}{campus, posicion}{posicion}{}
 
+\tadOperacion{cantidadDeHippies}{campus}{nat}{}
+\tadOperacion{cantidadDeEstudiantes}{campus}{nat}{}
+\tadOperacion{asMasVigilante}{campus}{placa}{}
+\tadOperacion{conjuntoDeCapturas}{dicc(placa,as)}{conj(nat)}{}
+\tadOperacion{DameMasVigilantes}{conj(nat)}{nat}{}
+\tadOperacion{PlacasPosibles}{dicc(placa,as)/ass, nat/NDeCapt}{conj(placa)}{nDeCaptValido(NDeCapt,ass)} %hay que hacer la restriccion
+\tadOperacion{elDeMenorPlaca}{conj(placa)}{placa}{}
+
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
 \tadAlinearAxiomas{estudiantes(movEstudiante(c, ini, fin))}
@@ -143,14 +151,7 @@
 \tadAxioma{asshole(saleEstudiante(c, p))}{asshole(c)}
 \tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
 \tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
-\tadAxioma{asshole(movAS(c, p))}{ \IF $\pi_2$(Obtener(p,asshole(c))) $\geq3$ 
-    THEN asshole(c)
-    ELSE {
-        \- \IF $\neg$hayHippies?(c) THEN movEntradaMasCercana(c, p)
-        ELSE perseguirHippiesCercanos(p,c)
-        FI
-    }
-    FI
+\tadAxioma{asshole(movAS(c, p))}{ nuevaPosAs(c,p)
 }
 
 \tadAxioma{posAS(c, p)}{$pi_1$(Obtener(p,asshole(c)))}
@@ -232,6 +233,40 @@
 
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
+\tadAxioma{nuevaPosAS(c, p)}{ \IF sanciones((Obtener(p,asshole(c)))) $\geq3$ 
+    THEN asshole(c)
+    ELSE {
+        \- \IF $\neg$hayHippies?(c) THEN movEntradaMasCercana(c, p)
+        ELSE perseguirHippiesCercanos(p,c)
+        FI
+    }
+    FI
+}
+
+\tadAxioma{cantidadDeHippies(c)}{ $\#$ hippies(c)}
+\tadAxioma{cantidadDeEstudiantes(c)}{ $\#$ estudiantes(c)}
+\tadAxioma{asMasVigilante(c)}{elDeMenorPlaca(PlacasPosibles(asshole(c), DameMasVigilantes(conjuntoDeCapturas(asshole(c)))))}
+
+\tadAxioma{conjuntoDeCapturas(asshole}{\IF $\#$ claves(asshole) $= 1$ THEN capturas(obtener(DameUno(claves(asshole)),asshole)) ELSE Ag(capturas(obtener(DameUno(claves(asshole)))), conjuntoDeCapturas(borrar(DameUno(claves(asshole))), asshole)) FI}
+
+\tadAxioma{DameMasVigilantes(conjCapturas)}{\IF $\#$conjCapturas $= 1$ THEN DameUno(conjCapturas) 
+ELSE max(DameUno(conjCapturas), DameMasVigilantes(SinUno(conjCapturas))) FI }
+
+\tadAxioma{PlacasPosibles(asshole, numeroDeCapturas)}{ \IF $\#$claves(asshole) $= 1$ 
+	THEN DameUno(claves(asshole)) 
+	ELSE{
+	 \- \IF capturas(DameUno(claves(asshole))) $=$ numeroDeCapturas THEN Ag(DameUno(claves(asshole)), PlacasPosibles(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas))
+	 	 ELSE PlacasPosibles(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas) 
+	 	 FI
+	}
+	FI
+} %hay que hacer la restriccion que diga que numeroDeCapturas es un numero perteneciente al conjunto de capturas de todas las claves del Dicc 
+
+\tadAxioma{elDeMenorPlaca(conjPlacas)}{\IF $\#$conjPlacas $= 1$ 
+	THEN DameUno(conjPlacas) 
+	ELSE min(DameUno(conjPlacas), elDeMenorPlaca(SinUno(conjPlacas))) 
+	FI 
+}
 
 
 \end{tad}
