@@ -151,7 +151,14 @@
 \tadAxioma{asshole(saleEstudiante(c, p))}{asshole(c)}
 \tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
 \tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
-\tadAxioma{asshole(movAS(c, p))}{ nuevaPosAs(c,p)
+\tadAxioma{asshole(movAS(c, p))}{ \IF sanciones((Obtener(p,asshole(c)))) $\geq3$ 
+    THEN asshole(c)
+    ELSE {
+        \- \IF $\neg$hayHippies?(c) THEN movEntradaMasCercana(c, p)
+        ELSE perseguirHippiesCercanos(p,c)
+        FI
+    }
+    FI(c,p)
 }
 
 \tadAxioma{posAS(c, p)}{$pi_1$(Obtener(p,asshole(c)))}
@@ -233,14 +240,14 @@
 
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
-\tadAxioma{nuevaPosAS(c, p)}{ \IF sanciones((Obtener(p,asshole(c)))) $\geq3$ 
-    THEN asshole(c)
+\tadAxioma{nuevaPosAS(c, placa)}{\IF sanciones((Obtener(placa,asshole(c)))) $\geq3$ 
+    THEN posicion(obtener(placa,asshole(c)))
     ELSE {
-        \- \IF $\neg$hayHippies?(c) THEN movEntradaMasCercana(c, p)
-        ELSE perseguirHippiesCercanos(p,c)
+        \- \IF $\neg$hayHippies?(c) THEN posicion(obtener(placa, movEntradaMasCercana(c, placa)))
+        ELSE posicion(obtener(placa, perseguirHippiesCercanos(placa,c)))
         FI
     }
-    FI
+    FI 
 }
 
 \tadAxioma{cantidadDeHippies(c)}{ $\#$ hippies(c)}
