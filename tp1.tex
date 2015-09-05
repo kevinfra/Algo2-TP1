@@ -105,7 +105,7 @@
 
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
 
-\tadAlinearFunciones{movEntradaMasCercana}{posicion, conj(posicion), campus}{}
+\tadAlinearFunciones{movEntradaCercana}{posicion, conj(posicion), campus}{}
 
 \tadOperacion{posSinAS?}{campus, posicion}{bool}{}
 \tadOperacion{esHippie?}{campus, posicion}{bool}{}
@@ -115,17 +115,17 @@
 \tadOperacion{esAS?}{campus, placa}{bool}{}
 \tadOperacion{nuevaPosAS}{campus, placa}{posicion}{}
 \tadOperacion{hayHippies?}{campus}{bool}{}
-\tadOperacion{movEntradaMasCercana}{campus, placa}{dicc(placa,as)}{}
+\tadOperacion{movEntradaCercana}{campus, placa}{dicc(placa,as)}{}
 \tadOperacion{posAS}{campus, placa}{posicion}{}
 \tadOperacion{nuevaPosicion}{posicion, conj(posicion),campus}{posicion}{}
-\tadOperacion{entradasMasCercanas}{posicion,grilla}{conj(posicion)}{}
+\tadOperacion{entradasCercanas}{posicion,grilla}{conj(posicion)}{}
 \tadOperacion{distancia}{nat,nat}{nat}{}
 \tadOperacion{seConvierteEnHippie?}{campus, posicion}{bool}{}
 \tadOperacion{estudiantesCapturados}{campus, posicion}{conj(posicion)}{}
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
 \tadOperacion{nuevaPosHippie}{campus, posicion}{posicion}{}
 
-\tadOperacion{moverseYActualizarAs}{placa,posicion,campus}{dicc(placa,as)}{}
+\tadOperacion{movYActualizarAS}{placa,posicion,campus}{dicc(placa,as)}{}
 \tadOperacion{actualizarAs}{posicion,dicc(placa,as),campus}{dicc(placa,as)}{}
 
 \tadOperacion{hayHippiesAtrapados}{posicion,campus}{bool}{}
@@ -152,12 +152,15 @@
 \tadOperacion{estaEnEntrada?}{posicion,grilla}{bool}{}
 
 \tadOperacion{distanciaTaxista}{posicion,posicion}{nat}{}
-\tadOperacion{menorDistanciaAP}{posicion/pos,con(posicion)/conjunto}{nat}{$\#$conjunto$>0$}
+\tadOperacion{menorDistanciaAPos}{posicion/pos,con(posicion)/conjunto}{nat}{$\#$conjunto$>0$}
 \tadOperacion{personasCercanas}{posicion,conj(posicion)}{conj(posicion)}{}
 \tadOperacion{sancionarAs}{conj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
 \tadOperacion{eAtrapados}{conj(posicion),campus}{conj(posicion)}{}
 \tadOperacion{premiarYSancionar}{conj((placa,bool)),campus}{dicc(placa,as)}{}
 %ojo con la funcion de arriba, false -> premiar, true-> sancionar
+
+\tadOperacion{perseguirHippies}{placa,campus}{dic(placa,as)}{}
+\tadOperacion{hippiesMasCercanos}{posicion,conj(posicion)}{conj(posicion)}{}
 
 %\tadOperacion{posParaMoverse}{posicion,conj(posicion),campus}{conj(posicion)}{}
 
@@ -183,8 +186,8 @@
 \tadAxioma{asshole(movAS(c, posAs))}{ \IF $\pi_2$(Obtener(posAs,asshole(c))) $\geq3$ 
     THEN asshole(c)
     ELSE {
-        \- \IF $\neg$hayHippies?(c) THEN movEntradaMasCercana(c, p)
-        ELSE perseguirHippiesCercanos(p,c)
+        \- \IF $\neg$hayHippies?(c) THEN movEntradaCercana(c, p)
+        ELSE perseguirHippies(p,c)
         FI
     }
     FI
@@ -194,9 +197,9 @@
 
 \tadAxioma{hayHippies?(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
 
-\tadAxioma{movEntradaMasCercana(c, p)}{\IF nuevaPosicion(posAS(c, p), entradasMasCercanas(posAS(c, p),grilla(c)))= posAS(c, p)
+\tadAxioma{movEntradaCercana(c, p)}{\IF nuevaPosicion(posAS(c, p),posQueAcercan(c,posAS(c,p),entradasCercanas(posAS(c, p),grilla(c)))= posAS(c, p)
     THEN asshole(c)
-    ELSE moverseYActualizar(p,nuevaPosicion(posAS(c, p), entradasMasCercanas(posAS(c, p),grilla(c))),c)
+    ELSE moverseYActualizar(p,nuevaPosicion(posAS(c, p),posQueAcercan(c,posAS(c,p),entradasCercanas(posAS(c, p),grilla(c))),c)
     FI
 }
 
@@ -209,7 +212,7 @@
     FI
 }
 
-\tadAxioma{entradasMasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0) 
+\tadAxioma{entradasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0) 
     THEN Ag(($\pi_1$(pos), alto(g)-1) $\emptyset$)
     ELSE {
         \IF distancia($\pi_2$(pos), 0) $<$ distancia($\pi_2$(pos), alto(g)-1)
@@ -269,7 +272,7 @@
 
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
-\tadAxioma{moverseYActualizarAs(p,nuevapos,c)}{
+\tadAxioma{movYActualizarAS(p,nuevapos,c)}{
 actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$(Obtener(p,asshole(c)))),asshole(c)),c)
 }
 
@@ -442,14 +445,14 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 \tadAxioma{distanciaTaxista(pos,posPers)}{ distancia($\pi_1$(pos),$\pi_1$(posPers)) - distancia($\pi_2$(pos),$\pi_2$(posPers))
 }
 
-\tadAxioma{menorDistanciaAP(pos,conj)}{ \IF $\#$(conj) $=1$ THEN distanciaTaxista(pos,DameUno(conj))
-	ELSE min(distanciaTaxista(pos,DameUno(conj)),menorDistanciaAP(pos,conj))
+\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) $=1$ THEN distanciaTaxista(pos,DameUno(conj))
+	ELSE min(distanciaTaxista(pos,DameUno(conj)),menorDistanciaAPos(pos,conj))
 	FI
 }
 
 \tadAxioma{personasCercanas(pos,conj)}{ \IF $\emptyset$?(conj) THEN $\emptyset$
 	ELSE{
-		\IF distanciaTaxista(pos,DameUno(conj))$=$menorDistanciaAP(pos,conj) THEN Ag(DameUno(conjH),personasCercanas(pos,SinUno(conj)))
+		\IF distanciaTaxista(pos,DameUno(conj))$=$menorDistanciaAPos(pos,conj) THEN Ag(DameUno(conjH),personasCercanas(pos,SinUno(conj)))
 		ELSE personasCercanas(pos,SinUno(conj))
 		FI
 	}
@@ -463,7 +466,7 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 
 \tadAxioma{eAtrapados(conjE,c)}{ \IF $\emptyset$?(conjAs) THEN $\emptyset$
 	ELSE{
-		\IF esAtrapadoE?(DameUno(conjE),posicionesContiguas(DameUno(conjE),grilla(c)),c)
+		\IF esAtrapadoE?(DameUno(conjE),posContiguas(DameUno(conjE),grilla(c)),c)
 		THEN Ag(DameUno(conjE),eAtrapados(SinUno(conjE),c))
 		ELSE eAtrapados(SinUno(conjE),c)
 		FI
@@ -480,6 +483,11 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 		FI
 	}
 	FI
+}
+
+\tadAxioma{perseguirHippies(p,c)}{ \IF nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p), hippiesMasCercanos(posAS(c,p), hippies(c))$=$posAS(c,p) THEN asshole(c)
+ELSE movYActualizarAS(p, nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p), hippiesMasCercanos(posAS(c,p), hippies(c)),c)
+FI
 }
 
 
