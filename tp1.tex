@@ -125,6 +125,14 @@
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
 \tadOperacion{nuevaPosHippie}{campus, posicion}{posicion}{}
 
+\tadOperacion{cantidadDeHippies}{campus}{nat}{}
+\tadOperacion{cantidadDeEstudiantes}{campus}{nat}{}
+\tadOperacion{asMasVigilante}{campus}{placa}{}
+\tadOperacion{conjuntoDeCapturas}{dicc(placa,as)}{conj(nat)}{}
+\tadOperacion{numCapturasMax}{conj(nat)}{nat}{}
+\tadOperacion{losMasVigilantes}{dicc(placa,as)/ass, nat/NDeCapt}{conj(placa)}{nDeCaptValido(NDeCapt,ass)} %hay que hacer la restriccion
+\tadOperacion{elDeMenorPlaca}{conj(placa)}{placa}{}
+
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
 \tadAlinearAxiomas{estudiantes(movEstudiante(c, ini, fin))}
@@ -143,14 +151,14 @@
 \tadAxioma{asshole(saleEstudiante(c, p))}{asshole(c)}
 \tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
 \tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
-\tadAxioma{asshole(movAS(c, p))}{ \IF $\pi_2$(Obtener(p,asshole(c))) $\geq3$ 
+\tadAxioma{asshole(movAS(c, p))}{ \IF sanciones((Obtener(p,asshole(c)))) $\geq3$
     THEN asshole(c)
     ELSE {
         \- \IF $\neg$hayHippies?(c) THEN movEntradaMasCercana(c, p)
         ELSE perseguirHippiesCercanos(p,c)
         FI
     }
-    FI
+    FI(c,p)
 }
 
 \tadAxioma{posAS(c, p)}{$pi_1$(Obtener(p,asshole(c)))}
@@ -165,14 +173,14 @@
 
 \tadAxioma{nuevaPosicion(posactual,conjpos,c)}{\IF $\emptyset$?(conjpos) THEN posactual
     ELSE {
-    \IF estaVaciaPos?(DameUno(conjpos),c) THEN DameUno(conjpos)
-        ELSE nuevaPosicion(posactual, SinUno(conjpos),c)
-        FI  
+    \IF estaVaciaPos?(dameUno(conjpos),c) THEN dameUno(conjpos)
+        ELSE nuevaPosicion(posactual, sinUno(conjpos),c)
+        FI
     }
     FI
 }
 
-\tadAxioma{entradasMasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0) 
+\tadAxioma{entradasMasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0)
     THEN Ag(($\pi_1$(pos), alto(g)-1) $\emptyset$)
     ELSE {
         \IF distancia($\pi_2$(pos), 0) $<$ distancia($\pi_2$(pos), alto(g)-1)
@@ -202,19 +210,19 @@
     % saber a donde se mueve el hippie
     % preguntar a quien convierte en hippies en esa nueva posicion y restarlos de estudiantes(c)
     % preguntar a quien acorrala el hippie con estudiantesCapturados de la nueva pos y restarlos tambien
-    estudiantes(c) - estudiantesCapturados(c, nuevaPosHippie(c, pos)) - estudiantesFalopeados(c, nuevaPosHippie(c, pos)) 
+    estudiantes(c) - estudiantesCapturados(c, nuevaPosHippie(c, pos)) - estudiantesFalopeados(c, nuevaPosHippie(c, pos))
 }
 \tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c) - estCapturadosPorAS(c, nuevaPosAS(c, id))}
 
 \tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
 \tadAxioma{iterarClaves(g, ass, claves)}{
     \IF $\emptyset$?(claves) THEN true
-    ELSE { 
+    ELSE {
     \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
     \-\- ELSE false
     \-\- FI
     }
-    FI 
+    FI
 }
 \tadAxioma{asValido?(g, as)}{
     posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\
@@ -254,6 +262,44 @@
 }
 
 
+\tadAxioma{nuevaPosAS(c, placa)}{\IF sanciones((Obtener(placa,asshole(c)))) $\geq3$
+    THEN posicion(obtener(placa,asshole(c)))
+    ELSE {
+        \- \IF $\neg$hayHippies?(c) THEN posicion(obtener(placa, movEntradaMasCercana(c, placa)))
+        ELSE posicion(obtener(placa, perseguirHippiesCercanos(placa,c)))
+        FI
+    }
+    FI
+}
+
+\tadAxioma{cantidadDeHippies(c)}{ $\#$ hippies(c)}
+\tadAxioma{cantidadDeEstudiantes(c)}{ $\#$ estudiantes(c)}
+\tadAxioma{asMasVigilante(c)}{elDeMenorPlaca(losMasVigilantes(asshole(c), numCapturasMax(conjuntoDeCapturas(asshole(c)))))}
+
+\tadAxioma{conjuntoDeCapturas(asshole}{\IF $\#$ claves(asshole) $= 1$ THEN capturas(obtener(dameUno(claves(asshole)),asshole)) ELSE Ag(capturas(obtener(dameUno(claves(asshole)))), conjuntoDeCapturas(borrar(dameUno(claves(asshole))), asshole)) FI}
+
+\tadAlinearAxiomas{losMasVigilantes(asshole, numCapturas)}
+
+\tadAxioma{numCapturasMax(conjCapturas)}{\IF $\#$conjCapturas $= 1$ THEN dameUno(conjCapturas)
+ELSE max(dameUno(conjCapturas), numCapturasMax(sinUno(conjCapturas))) FI }
+
+\tadAxioma{losMasVigilantes(asshole, numCapturas)}{ \IF $\#$claves(asshole) $= 1$
+	THEN dameUno(claves(asshole))
+	ELSE{
+	 \- \IF capturas(dameUno(claves(asshole))) $=$ numCapturas THEN Ag(dameUno(claves(asshole)), losMasVigilantes(borrar(dameUno(claves(asshole)), asshole), numCapturas))
+	 	 ELSE losMasVigilantes(borrar(dameUno(claves(asshole)), asshole), numCapturas)
+	 	 FI
+	}
+	FI
+} %hay que hacer la restriccion que diga que numeroDeCapturas es un numero perteneciente al conjunto de capturas de todas las claves del Dicc
+
+\tadAxioma{elDeMenorPlaca(conjPlacas)}{\IF $\#$conjPlacas $= 1$
+	THEN dameUno(conjPlacas)
+	ELSE min(dameUno(conjPlacas), elDeMenorPlaca(sinUno(conjPlacas)))
+	FI
+}
+
+\tadAxioma{nuevaPosHippie(c,pos)}{nuevaPosicion(pos, posQueAcercan(personasCercanas(pos, \\estudiantes(c))), c)}
 
 \end{tad}
 
