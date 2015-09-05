@@ -232,45 +232,28 @@
 
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
-\tadAxioma{posSinAS?(c, p)}{ \IF p $\notin$ conjuntoPosAs(claves(asshole(c),asshole(c)))
-    THEN true
-    ELSE {
-        false
-    }
-    FI
+\tadAxioma{posSinAS?(c, pos)}{ pos $\notin$ conjuntoPosAs(claves(asshole(c),asshole(c)))
 }
 
-\tadAxioma{esHippie?(c, p)}{ \IF p $\in$ hippies(c)
-    THEN true
-    ELSE {
-        false
-    }
-    FI
+\tadAxioma{esHippie?(c, pos)}{ pos $\in$ hippies(c)
 }
 
-\tadAxioma{esEstudiante?(c, p)}{ \IF p $\in$ estudiantes(c)
-    THEN true
-    ELSE {
-        false
-    }
-    FI
+\tadAxioma{esEstudiante?(c, pos)}{ pos $\in$ estudiantes(c)
 }
 
-\tadAxioma{esEntrada?(c,p)}{ \IF $\pi_2$(p) = 0 $\land$ $\pi_2$(p) = alto(grilla(c)) - 1 
-    THEN true
-    ELSE {
-       false
-    }
-    FI
+\tadAxioma{esEntrada?(c,pos)}{ $\pi_2$(pos) = 0 $\lor$ $\pi_2$(pos) = alto(grilla(c)) - 1 
 }
 
-\tadAxioma{esAS?(c, p)}{ \IF def?(p,asshole(c))
-    THEN true
-    ELSE {
-        false
-    }
-    FI
+\tadAxioma{esAS?(c, p)}{ def?(p,asshole(c))
 }
+
+\tadAxioma{adyacentes?(pos1, pos2)}{ ($\pi_2$(pos1) = $\pi_2$(pos2) + 1 $\land$ $\pi_1$(pos1) = $\pi_1$(pos2))
+     $\lor$ ($\pi_2$(pos2) = $\pi_2$(pos1) + 1 $\land$ $\pi_1$(pos1) = $\pi_1$(pos2))    
+     $\lor$ ($\pi_1$(pos1) = $\pi_1$(pos2) + 1 $\land$ $\pi_2$(pos1) = $\pi_2$(pos2))    
+     $\lor$ ($\pi_1$(pos2) = $\pi_1$(pos1) + 1 $\land$ $\pi_2$(pos1) = $\pi_2$(pos2))        
+}
+
+
 
 \end{tad}
 
