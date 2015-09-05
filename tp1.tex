@@ -129,22 +129,18 @@
 \tadOperacion{actualizarAs}{posicion,dicc(placa,as),campus}{dicc(placa,as)}{}
 
 \tadOperacion{hayHippiesAtrapados}{posicion,campus}{bool}{}
-\tadOperacion{posConHippies}{conj(posicion),conj(posicion)}{conj(posicion)}{}
 \tadOperacion{posContiguas}{posicion,grilla}{conj(posicion)}{}
 \tadOperacion{posValidasCont}{conj(posicion),grilla}{conj(posicion)}{}
 \tadOperacion{conjuntoPosAs}{conj(placa),dicc(placa,as)}{conj(posicion)}{}
-\tadOperacion{revisarHippies}{conj(posicion),campus}{bool}{}
 \tadOperacion{esAtrapadoH?}{posicion,conj(posicion),campus}{bool}{}
 \tadOperacion{hayPosVacia?}{conj(posicion),campus}{bool}{}
 \tadOperacion{hayEstudiantesAtrapados}{posicion,campus}{bool}{}
-\tadOperacion{posConEstudiantes}{conj(posicion),conj(posicion)}{conj(posicion)}{}
-\tadOperacion{revisarEstudiantes}{conj(estudiantes),campus}{bool}{}
 \tadOperacion{esAtrapadoE?}{posicion,conj(posicion),campus}{bool}{}
 
-\tadOperacion{premiarAs}{conj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
-\tadOperacion{rodeo}{conj(posicion),campus}{conj(posicion)}{}
+\tadOperacion{premiarAs}{multiconj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
+\tadOperacion{periferia}{multiconj(posicion),campus}{conj(posicion)}{}
 \tadOperacion{placaDelAs}{posicion/pos,conj(placa)/conjplacas,dicc(placa,as)/dic}{placa}{pos $\in$ conjuntoPosAs(conjplacas,dic)}
-\tadOperacion{asParaPremiar}{conj(posicion),campus}{conj(placa)}{}
+\tadOperacion{asParaModificar}{multiconj(posicion),campus}{multiconj(placa)}{}
 \tadOperacion{hAtrapados}{conj(posicion),campus}{conj(posicion)}{}
 
 \tadOperacion{capturadoH}{posicion,campus}{bool}{}
@@ -154,16 +150,15 @@
 \tadOperacion{distanciaTaxista}{posicion,posicion}{nat}{}
 \tadOperacion{menorDistanciaAPos}{posicion/pos,con(posicion)/conjunto}{nat}{$\#$conjunto$>0$}
 \tadOperacion{personasCercanas}{posicion,conj(posicion)}{conj(posicion)}{}
-\tadOperacion{sancionarAs}{conj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
+\tadOperacion{sancionarAs}{multiconj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
 \tadOperacion{eAtrapados}{conj(posicion),campus}{conj(posicion)}{}
-\tadOperacion{premiarYSancionar}{conj((placa,bool)),campus}{dicc(placa,as)}{}
+\tadOperacion{premiarYSancionar}{multiconj((placa,bool)),campus}{dicc(placa,as)}{}
 %ojo con la funcion de arriba, false -> premiar, true-> sancionar
 
 \tadOperacion{perseguirHippies}{placa,campus}{dic(placa,as)}{}
 \tadOperacion{hippiesMasCercanos}{posicion,conj(posicion)}{conj(posicion)}{}
 
-%\tadOperacion{posParaMoverse}{posicion,conj(posicion),campus}{conj(posicion)}{}
-
+\tadOperacion{asSancPrem}{multiconj(posicion),multiconj(posicion),campus}{conj((placa,bool))}{}
 
 % Axiomas
 \tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
@@ -280,10 +275,10 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 	\IF $\neg$hayHippiesAtrapados(pos,c) $\land \neg$hayEstudiantesAtrapados(pos,c) THEN dic
 	ELSE {
 		\IF hayHippiesAtrapados(pos,c) $\land \neg$hayEstudiantesAtrapados(pos,c) 
-		THEN premiarAs(asParaPremiar(rodeo(posConHippies(posContiguas(pos ,grilla(c)) ,Hippies(c)) ,c) ,c) ,c)
+		THEN premiarAs(asParaModificar(periferia(hAtrapados(posContiguas(pos ,grilla(c)),c),c),c),c)
 		ELSE{
-			\IF	$\neg$hayHippiesAtrapados(pos,c) $\land$ hayEstudiantesAtrapados(pos,c) THEN sancionarAs(pos,claves(dic),c)
-			ELSE premiarYSancionarAs(pos,claves(dic),c)
+			\IF	$\neg$hayHippiesAtrapados(pos,c) $\land$ hayEstudiantesAtrapados(pos,c) THEN sancionarAs(asParaModificar(periferia(eAtrapados(posContiguas(pos ,grilla(c)),c),c),c),c)
+			ELSE premiarYSancionarAs(asParaModificar(periferia(hAtrapados(posContiguas(pos ,grilla(c)),c),c),c), asSancPrem(asParaModificar(periferia(eAtrapados(posContiguas(pos ,grilla(c)),c),c),c),c),c)
 			FI
 		}
 		FI
@@ -291,20 +286,7 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 	FI
 }
 
-\tadAxioma{hayHippiesAtrapados(pos,c)}{
-	\IF $\emptyset$?(posConHippies(posContiguas(pos,grilla(c)),Hippies(c))) THEN false
-	ELSE revisarHippies(posConHippies(posContiguas(pos,grilla(c)),Hippies(c)),Hippies(c)),c)
-	FI
-}
-
-\tadAxioma{posConHippies(poscont,conjhippies)}{
-	\IF $\emptyset$?(poscont) THEN $\emptyset$
-	ELSE{
-		\IF DameUno(poscont) $\in$ conjhippies	THEN Ag(DameUno(poscont),posConHippies(SinUno(poscont),conjhippies))
-		ELSE posConHippies(SinUno(poscont),conjhippies)
-		FI
-	}
-	FI
+\tadAxioma{hayHippiesAtrapados(pos,c)}{ $\emptyset$?(hAtrapados(posContiguas(pos, grilla(c)), c))
 }
 
 \tadAxioma{posContiguas(pos,g)}{ posValidasCont(Ag(($\pi_1$(pos)+1,$\pi_2$(pos)), Ag(($\pi_1$(pos)-1,$\pi_2$(pos)), Ag(($\pi_1$(pos),$\pi_2$(pos)+1), Ag(($\pi_1$(pos),$\pi_2$(pos)-1), $\emptyset$),g)
@@ -323,17 +305,6 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 \tadAxioma{conjuntoPosAs(conjclaves,dic)}{
 	\IF $\emptyset$?(conjclaves) THEN $\emptyset$
 	ELSE Ag($\pi_1$(Obtener(DameUno(conjclaves),dic)),conjuntoPosAs(SinUno(conjclaves),dic)
-	FI
-}
-
-\tadAxioma{revisarHippies(conjpos,c)}{
-	\IF $\emptyset$?(conjpos) THEN false
-	ELSE{
-		\IF esAtrapadoH?(DameUno(conjpos), posContiguas(DameUno(conjpos),grilla(c)),c)
-		THEN true
-		ELSE revisarHippies(SinUno(conjpos),c)
-		FI
-	}
 	FI
 }
 
@@ -357,30 +328,7 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 	FI
 }
 
-\tadAxioma{hayEstudiantesAtrapados(pos,c)}{
-	\IF $\emptyset$?(posConEstudiantes(posContiguas(pos, grilla(c)), Estudiantes(c))) THEN false
-	ELSE revisarEstudiantes(posConEstudiantes(posContiguas(pos, grilla(c)), Estudiantes(c)),c)
-	FI
-}
-
-\tadAxioma{posConEstudiantes(poscont, conjest)}{
-	\IF $\emptyset$?(poscont) THEN $\emptyset$
-	ELSE{
-		\IF DameUno(poscont) $\in$ conjest THEN Ag(DameUno(poscont), posConEstudiantes(SinUno(poscont), conjest))
-		ELSE posConEstudiantes(SinUno(poscont), conjest)
-		FI
-	}
-	FI
-}
-
-\tadAxioma{revisarEstudiantes(conjpos,c)}{
-	\IF $\emptyset$?(conjpos) THEN false
-	ELSE{
-		\IF esAtrapadoE?(DameUno(conjpos), posContiguas(DameUno(conjpos),grilla(c)),c))) THEN true
-		ELSE revisarEstudiantes(SinUno(conjpos),c)
-		FI
-	}
-	FI
+\tadAxioma{hayEstudiantesAtrapados(pos,c)}{ $\emptyset$?(eAtrapados(posContiguas(pos, grilla(c)), c))
 }
 
 \tadAxioma{esAtrapadoE?(posE,conjcont,c)}{
@@ -399,9 +347,9 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 	FI
 }
 
-\tadAxioma{rodeo(conj,c)}{
+\tadAxioma{periferia(conj,c)}{
 	\IF $\emptyset$?(conjAs) THEN $\emptyset$
-	ELSE posValidaCont(posContigua(DameUno(conj)),grilla(c)) $\cup$ rodeo(SinUno(conj),c)
+	ELSE posValidaCont(posContigua(DameUno(conj)),grilla(c)) $\cup$ periferia(SinUno(conj),c)
 	FI
 }
 
@@ -411,23 +359,27 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 	FI
 }
 
-\tadAxioma{asParaPremiar(conjtodo,c)}{
+\tadAxioma{asParaModificar(conjtodo,c)}{
 	\IF $\emptyset$?(conjAs) THEN $\emptyset$
 	ELSE{
 		\IF DameUno(conjtodo) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c))
-		THEN Ag(placaDelAs(DameUno(conjtodo),claves(asshole(c),asshole(c)),asParaPremiar(SinUno(conjtodo),c))
-		ELSE asParaPremiar(SinUno(conjtodo),c)
+		THEN Ag(placaDelAs(DameUno(conjtodo),claves(asshole(c),asshole(c)),asParaModificar(SinUno(conjtodo),c))
+		ELSE asParaModificar(SinUno(conjtodo),c)
 		FI
 	}
 	FI
 }
 
-\tadAxioma{hAtrapados(conjH,c)}{
-	\IF $\emptyset$?(conjH) THEN $\emptyset$
+\tadAxioma{hAtrapados(conjContiguo,c)}{ \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
 	ELSE{
-		\IF esAtrapadoH(DameUno(conjH), posContiguas(DameUno(conjH),grilla(c)), c)
-		THEN Ag(DameUno(conjH), hAtrapados(SinUno(conjH),c)
-		ELSE hAtrapados(SinUno(conjH),c)
+		\IF DameUno(conjContiguo)$\in$hippies(c)
+		THEN{
+			\IF esAtrapadoH?(DameUno(conjContiguo), posContiguas(DameUno(conjContiguo),c))
+			THEN Ag(DameUno(conjContiguo),hAtrapados(SinUno(conContiguo),c))
+			ELSE hAtrapados(SinUno(conjContiguo),c)
+			FI
+		}
+		ELSE hAtrapados(SinUno(conjContiguo),c)
 		FI
 	}
 	FI
@@ -464,11 +416,16 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 	FI
 }
 
-\tadAxioma{eAtrapados(conjE,c)}{ \IF $\emptyset$?(conjAs) THEN $\emptyset$
+\tadAxioma{eAtrapados(conjContiguo,c)}{ \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
 	ELSE{
-		\IF esAtrapadoE?(DameUno(conjE),posContiguas(DameUno(conjE),grilla(c)),c)
-		THEN Ag(DameUno(conjE),eAtrapados(SinUno(conjE),c))
-		ELSE eAtrapados(SinUno(conjE),c)
+		\IF DameUno(conjContiguo)$\in$estudiantes(c)
+		THEN{
+			\IF esAtrapadoE?(DameUno(conjContiguo), posContiguas(DameUno(conjContiguo),c))
+			THEN Ag(DameUno(conjContiguo),eAtrapados(SinUno(conContiguo),c))
+			ELSE eAtrapados(SinUno(conjContiguo),c)
+			FI
+		}
+		ELSE eAtrapados(SinUno(conjContiguo),c)
 		FI
 	}
 	FI
@@ -488,6 +445,24 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 \tadAxioma{perseguirHippies(p,c)}{ \IF nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p), hippiesMasCercanos(posAS(c,p), hippies(c))$=$posAS(c,p) THEN asshole(c)
 ELSE movYActualizarAS(p, nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p), hippiesMasCercanos(posAS(c,p), hippies(c)),c)
 FI
+}
+
+\tadAxioma{asSancPrem(conjPrem,conjSanc,c)}{
+	\IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$
+	ELSE{
+		\IF $\neq \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 
+		THEN Ag( (placaDelAs(dameUno(conjPrem),claves(asshole(c)),asshole(c)),false), asSancPrem(sinUno(conjPrem),conjSanc,c))
+		ELSE{
+			\IF $\emptyset$?(conjPrem)$\land \neq \emptyset$?(conjSanc)
+			THEN Ag( (placaDelAs(dameUno(conjSanc),claves(asshole(c)),asshole(c)),false), asSancPrem(conjPrem,sinUno(conjSanc),c))
+			ELSE{
+					Ag((placaDelAs(dameUno(conjPrem),claves(asshole(c)),asshole(c)),false), Ag((placaDelAs(dameUno(conjSanc),claves(asshole(c)),asshole(c)),false), asSancPrem(sinUno(conjPrem),sinUno(conjSanc),c)))
+			}
+			FI
+		}
+		FI
+	}
+	FI
 }
 
 
