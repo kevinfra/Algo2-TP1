@@ -241,16 +241,16 @@
 \tadAxioma{esEstudiante?(c, pos)}{ pos $\in$ estudiantes(c)
 }
 
-\tadAxioma{esEntrada?(c,pos)}{ $\pi_2$(pos) = 0 $\lor$ $\pi_2$(pos) = alto(grilla(c)) - 1 
+\tadAxioma{esEntrada?(c,pos)}{ pos.y = 0 $\lor$ pos.y = alto(grilla(c)) - 1 
 }
 
 \tadAxioma{esAS?(c, p)}{ def?(p,asshole(c))
 }
 
-\tadAxioma{adyacentes?(pos1, pos2)}{ ($\pi_2$(pos1) = $\pi_2$(pos2) + 1 $\land$ $\pi_1$(pos1) = $\pi_1$(pos2))
-     $\lor$ ($\pi_2$(pos2) = $\pi_2$(pos1) + 1 $\land$ $\pi_1$(pos1) = $\pi_1$(pos2))    
-     $\lor$ ($\pi_1$(pos1) = $\pi_1$(pos2) + 1 $\land$ $\pi_2$(pos1) = $\pi_2$(pos2))    
-     $\lor$ ($\pi_1$(pos2) = $\pi_1$(pos1) + 1 $\land$ $\pi_2$(pos1) = $\pi_2$(pos2))        
+\tadAxioma{adyacentes?(pos1, pos2)}{ (pos1.y = pos2.y + 1 $\land$ pos1.x = pos2.x)
+     $\lor$ (pos2.y = pos1.y + 1 $\land$ pos1.x = pos2.x)    
+     $\lor$ (pos1.x = pos2.x + 1 $\land$ pos1.y = pos2.y)    
+     $\lor$ (pos2.x = pos1.x + 1 $\land$ pos1.y = pos2.y)        
 }
 
 
