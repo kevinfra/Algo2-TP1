@@ -129,8 +129,8 @@
 \tadOperacion{cantidadDeEstudiantes}{campus}{nat}{}
 \tadOperacion{asMasVigilante}{campus}{placa}{}
 \tadOperacion{conjuntoDeCapturas}{dicc(placa,as)}{conj(nat)}{}
-\tadOperacion{DameMasVigilantes}{conj(nat)}{nat}{}
-\tadOperacion{PlacasPosibles}{dicc(placa,as)/ass, nat/NDeCapt}{conj(placa)}{nDeCaptValido(NDeCapt,ass)} %hay que hacer la restriccion
+\tadOperacion{numCapturasMax}{conj(nat)}{nat}{}
+\tadOperacion{losMasVigilantes}{dicc(placa,as)/ass, nat/NDeCapt}{conj(placa)}{nDeCaptValido(NDeCapt,ass)} %hay que hacer la restriccion
 \tadOperacion{elDeMenorPlaca}{conj(placa)}{placa}{}
 
 % Axiomas
@@ -252,18 +252,18 @@
 
 \tadAxioma{cantidadDeHippies(c)}{ $\#$ hippies(c)}
 \tadAxioma{cantidadDeEstudiantes(c)}{ $\#$ estudiantes(c)}
-\tadAxioma{asMasVigilante(c)}{elDeMenorPlaca(PlacasPosibles(asshole(c), DameMasVigilantes(conjuntoDeCapturas(asshole(c)))))}
+\tadAxioma{asMasVigilante(c)}{elDeMenorPlaca(losMasVigilantes(asshole(c), numCapturasMax(conjuntoDeCapturas(asshole(c)))))}
 
 \tadAxioma{conjuntoDeCapturas(asshole}{\IF $\#$ claves(asshole) $= 1$ THEN capturas(obtener(DameUno(claves(asshole)),asshole)) ELSE Ag(capturas(obtener(DameUno(claves(asshole)))), conjuntoDeCapturas(borrar(DameUno(claves(asshole))), asshole)) FI}
 
-\tadAxioma{DameMasVigilantes(conjCapturas)}{\IF $\#$conjCapturas $= 1$ THEN DameUno(conjCapturas)
-ELSE max(DameUno(conjCapturas), DameMasVigilantes(SinUno(conjCapturas))) FI }
+\tadAxioma{numCapturasMax(conjCapturas)}{\IF $\#$conjCapturas $= 1$ THEN DameUno(conjCapturas)
+ELSE max(DameUno(conjCapturas), numCapturasMax(SinUno(conjCapturas))) FI }
 
-\tadAxioma{PlacasPosibles(asshole, numeroDeCapturas)}{ \IF $\#$claves(asshole) $= 1$
+\tadAxioma{losMasVigilantes(asshole, numeroDeCapturas)}{ \IF $\#$claves(asshole) $= 1$
 	THEN DameUno(claves(asshole))
 	ELSE{
-	 \- \IF capturas(DameUno(claves(asshole))) $=$ numeroDeCapturas THEN Ag(DameUno(claves(asshole)), PlacasPosibles(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas))
-	 	 ELSE PlacasPosibles(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas)
+	 \- \IF capturas(DameUno(claves(asshole))) $=$ numeroDeCapturas THEN Ag(DameUno(claves(asshole)), losMasVigilantes(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas))
+	 	 ELSE losMasVigilantes(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas)
 	 	 FI
 	}
 	FI
@@ -275,41 +275,7 @@ ELSE max(DameUno(conjCapturas), DameMasVigilantes(SinUno(conjCapturas))) FI }
 	FI
 }
 
-\tadAxioma{seConvierteEnHippie?(c, pos)}{hayHippiesCerca(posContiguas(pos, grilla(c)), c)}
-\tadAxioma{hayHippiesCerca(posiciones, c)}{\IF $\emptyset$?(posiciones) 
-	THEN false
-	ELSE {
-	\- \IF esHippie?(c, DameUno(posiciones)) 
-		THEN hayOtrosHippies(SinUno(posciciones), c)
-		ELSE hayHippiesCerca(posiciones, c)FI}
-	FI
-}
-\tadAxioma{hayOtrosHippies(posiciones, c)}{\IF $\emptyset$?(posiciones)
-	THEN false
-	ELSE { \- \IF esHippie?(c, DameUno(posiciones))
-			THEN true
-			ELSE hayOtrosHippie(SinUno(posiciones), c) FI }
-	FI
-}
-
-\tadAxioma{nuevaPosHippie(c,pos)}{\IF hayEstudiantes(c) THEN
-	perseguirEstudiantesCercanos(c, pos) ELSE
-	pos
-	FI
-}
-\tadAxioma{hayEstudiantes(c)}{$\#$estudiantes(c) $> 0$}
-
-\tadAxioma{perseguirEstudiantesCercanos(c,pos)}{NuevaPosicion(pos, estudiantesCercanos(estudiantes(c), pos), c)}
-
-\tadAxioma{estudiantesCercanos(estudiantes, posActual)}{ \IF esCercano(DameUno(estudiantes), posActual, estudiantes) 
-	THEN Ag(DameUno(estudiantes), estudiantesCercanos(SinUno(estudiantes), posActual))
-	ELSE estudiantesCercanos(SinUno(estudiantes), posActual)
-	FI
-}
-\tadAxioma{esCercano(objetivo, posActual, conjObjetivos)}{(distancia(objetivo.x, posActual.x) \newline $+$ distancia(objetivo.y, posActual.y)) \newline $=$ elMasCercano(posActual, conjObjetivos)}
-
-\tadAxioma{elMasCercano(posActual, conjObjetivos)}{
-	\IF $\#$conjObjetivos $=$ 1 THEN DameUno(conjObjetivos) ELSE min( (distancia(DameUno(conjObjetivos).x, posActual.x) $+$ distancia(DameUno(conjObjetivos).y, posActual.y)), \newline elMasCercano(posActual, SinUno(conjObjetivos)) ) FI} 
+\tadAxioma{nuevaPosHippie(c,pos)}{nuevaPosicion(pos, posQueAcercan(personasCercanas(pos, \\estudiantes(c))), c)}
 
 \end{tad}
 
