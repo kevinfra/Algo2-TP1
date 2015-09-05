@@ -178,7 +178,7 @@
 \tadAxioma{asshole(saleEstudiante(c, posE))}{asshole(c)}
 \tadAxioma{asshole(movEstudiante(c, posE, dir))}{actualizarAs(posE,asshole(c),c)}
 \tadAxioma{asshole(movHippie(c, posH))}{actualizarAs(posH,asshole(c),c)}
-\tadAxioma{asshole(movAS(c, posAs))}{ \IF $\pi_2$(Obtener(posAs,asshole(c))) $\geq3$ 
+\tadAxioma{asshole(movAS(c, p))}{ \IF Obtener(p,asshole(c)).sanciones $\geq3$ 
     THEN asshole(c)
     ELSE {
         \- \IF $\neg$hayHippies?(c) THEN movEntradaCercana(c, p)
@@ -188,7 +188,7 @@
     FI
 }
 
-\tadAxioma{posAS(c, p)}{$\pi_1$(Obtener(p,asshole(c)))}
+\tadAxioma{posAS(c, p)}{Obtener(p,asshole(c)).poscion}
 
 \tadAxioma{hayHippies?(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
 
@@ -200,19 +200,19 @@
 
 \tadAxioma{nuevaPosicion(posactual,conjpos,c)}{\IF $\emptyset$?(conjpos) THEN posactual
     ELSE {
-    \IF estaVaciaPos?(DameUno(conjpos),c) THEN DameUno(conjpos)
-        ELSE nuevaPosicion(posactual, SinUno(conjpos),c)
+    \IF estaVaciaPos?(dameUno(conjpos),c) THEN dameUno(conjpos)
+        ELSE nuevaPosicion(posactual, sinUno(conjpos),c)
         FI  
     }
     FI
 }
 
-\tadAxioma{entradasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0) 
-    THEN Ag(($\pi_1$(pos), alto(g)-1) $\emptyset$)
+\tadAxioma{entradasCercanas}{ \IF distancia(pos.y, alto(g)-1) $<$ distancia(pos.y, 0) 
+    THEN Ag((pos.x, alto(g)-1) $\emptyset$)
     ELSE {
-        \IF distancia($\pi_2$(pos), 0) $<$ distancia($\pi_2$(pos), alto(g)-1)
-        THEN Ag(($\pi_1$(pos), 0) $\emptyset$)
-        ELSE Ag(($\pi_2$(pos), alto(g)-1), Ag(($\pi_1$(pos), 0) $\emptyset$))
+        \IF distancia(pos.y, 0) $<$ distancia(pos, alto(g)-1)
+        THEN Ag((pos.x, 0) $\emptyset$)
+        ELSE Ag((pos.x, alto(g)-1), Ag((pos.x, 0) $\emptyset$))
         FI
     }
     FI
@@ -268,7 +268,7 @@
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
 \tadAxioma{movYActualizarAS(p,nuevapos,c)}{
-actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$(Obtener(p,asshole(c)))),asshole(c)),c)
+actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener(p,asshole(c)).sanciones),asshole(c)),c)
 }
 
 \tadAxioma{actualizarAs(pos,dic,c)}{
@@ -289,14 +289,14 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 \tadAxioma{hayHippiesAtrapados(pos,c)}{ $\emptyset$?(hAtrapados(posContiguas(pos, grilla(c)), c))
 }
 
-\tadAxioma{posContiguas(pos,g)}{ posValidasCont(Ag(($\pi_1$(pos)+1,$\pi_2$(pos)), Ag(($\pi_1$(pos)-1,$\pi_2$(pos)), Ag(($\pi_1$(pos),$\pi_2$(pos)+1), Ag(($\pi_1$(pos),$\pi_2$(pos)-1), $\emptyset$),g)
+\tadAxioma{posContiguas(pos,g)}{ posValidasCont(Ag((pos.x+1,pos.y), Ag((pos.x-1,pos.y), Ag((pos.x,pos.y+1), Ag((pos.x,pos.y 1), $\emptyset$),g)
 }
 
 \tadAxioma{posValidasCont(conj,g)}{
 	\IF $\emptyset$?(conj) THEN $\emptyset$
 	ELSE{
-		\IF posValida?(g,DameUno(conj)) THEN Ag(DameUno(conj),posValidasCont(g,SinUno(conj)))
-		ELSE posValidasCont(g,SinUno(conj))
+		\IF posValida?(g,dameUno(conj)) THEN Ag(dameUno(conj),posValidasCont(g,sinUno(conj)))
+		ELSE posValidasCont(g,sinUno(conj))
 		FI
 	}
 	FI
@@ -304,15 +304,15 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 
 \tadAxioma{conjuntoPosAs(conjclaves,dic)}{
 	\IF $\emptyset$?(conjclaves) THEN $\emptyset$
-	ELSE Ag($\pi_1$(Obtener(DameUno(conjclaves),dic)),conjuntoPosAs(SinUno(conjclaves),dic)
+	ELSE Ag(Obtener(dameUno(conjclaves),dic).posicion, conjuntoPosAs(sinUno(conjclaves),dic)
 	FI
 }
 
 \tadAxioma{esAtrapadoH?(posh,conjcont,c)}{
 	\IF hayPosVacia?(conjcont,c) THEN false
 	ELSE{
-		\IF DameUno(conjcont) $\in$ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) THEN true
-		ELSE esAtrapadoH?(posh,SinUno(conjcont),c)
+		\IF dameUno(conjcont) $\in$ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) THEN true
+		ELSE esAtrapadoH?(posh,sinUno(conjcont),c)
 		FI	
 	}
 	FI
@@ -321,7 +321,7 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 \tadAxioma{hayPosVacia?(conjpos,c)}{
 	\IF $\emptyset$?(conjpos) THEN false
 	ELSE{
-		\IF estaVaciaPos?(DameUno(conjpos)) THEN true
+		\IF estaVaciaPos?(dameUno(conjpos)) THEN true
 		ELSE hayPosVacia?(conjpos,c)
 		FI	
 	}
@@ -334,8 +334,8 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 \tadAxioma{esAtrapadoE?(posE,conjcont,c)}{
 	\IF hayPosVacia?(conjcont,c) $\lor$ estaEnEntrada(posE,grilla(c)) THEN false
 	ELSE {
-		\IF DameUno(conjcont) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c)) THEN true
-		ELSE esAtrapadoE?(posE,SinUno(conjcont),c)
+		\IF dameUno(conjcont) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c)) THEN true
+		ELSE esAtrapadoE?(posE,sinUno(conjcont),c)
 		FI	
 	}
 	FI
@@ -343,28 +343,28 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 
 \tadAxioma{premiarAs(conjAs,c)}{
 	\IF $\emptyset$?(conjAs) THEN asshole(c)
-	ELSE definir(DameUno(conjAs), ($\pi_1$(Obtener(DameUno(conjAs),asshole(c)) , $\pi_2$(Obtener(DameUno(conjAs),asshole(c))+1,$\pi_3$(Obtener(DameUno(conjAs),asshole(c)), premiarAs(SinUno(conjAs),c))
+	ELSE definir(dameUno(conjAs), ($\pi_1$(Obtener(dameUno(conjAs),asshole(c)) , $\pi_2$(Obtener(dameUno(conjAs),asshole(c))+1,$\pi_3$(Obtener(dameUno(conjAs),asshole(c)), premiarAs(sinUno(conjAs),c))
 	FI
 }
 
 \tadAxioma{periferia(conj,c)}{
 	\IF $\emptyset$?(conjAs) THEN $\emptyset$
-	ELSE posValidaCont(posContigua(DameUno(conj)),grilla(c)) $\cup$ periferia(SinUno(conj),c)
+	ELSE posValidaCont(posContigua(dameUno(conj)),grilla(c)) $\cup$ periferia(sinUno(conj),c)
 	FI
 }
 
 \tadAxioma{placaDelAs(pos,conjplacas,dic)}{
-	\IF $\pi_1$(Obtener(DameUno(conjplacas),dic) $=$ pos THEN DameUno(conjplacas)
-	ELSE placaDelAs(pos,SinUno(conjplacas),dic)
+	\IF Obtener(dameUno(conjplacas),dic).posicion $=$ pos THEN dameUno(conjplacas)
+	ELSE placaDelAs(pos,sinUno(conjplacas),dic)
 	FI
 }
 
 \tadAxioma{asParaModificar(conjtodo,c)}{
 	\IF $\emptyset$?(conjAs) THEN $\emptyset$
 	ELSE{
-		\IF DameUno(conjtodo) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c))
-		THEN Ag(placaDelAs(DameUno(conjtodo),claves(asshole(c),asshole(c)),asParaModificar(SinUno(conjtodo),c))
-		ELSE asParaModificar(SinUno(conjtodo),c)
+		\IF dameUno(conjtodo) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c))
+		THEN Ag(placaDelAs(dameUno(conjtodo),claves(asshole(c),asshole(c)),asParaModificar(sinUno(conjtodo),c))
+		ELSE asParaModificar(sinUno(conjtodo),c)
 		FI
 	}
 	FI
@@ -372,14 +372,14 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 
 \tadAxioma{hAtrapados(conjContiguo,c)}{ \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
 	ELSE{
-		\IF DameUno(conjContiguo)$\in$hippies(c)
+		\IF dameUno(conjContiguo)$\in$hippies(c)
 		THEN{
-			\IF esAtrapadoH?(DameUno(conjContiguo), posContiguas(DameUno(conjContiguo),c))
-			THEN Ag(DameUno(conjContiguo),hAtrapados(SinUno(conContiguo),c))
-			ELSE hAtrapados(SinUno(conjContiguo),c)
+			\IF esAtrapadoH?(dameUno(conjContiguo), posContiguas(dameUno(conjContiguo),c))
+			THEN Ag(dameUno(conjContiguo),hAtrapados(sinUno(conContiguo),c))
+			ELSE hAtrapados(sinUno(conjContiguo),c)
 			FI
 		}
-		ELSE hAtrapados(SinUno(conjContiguo),c)
+		ELSE hAtrapados(sinUno(conjContiguo),c)
 		FI
 	}
 	FI
@@ -391,41 +391,41 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 \tadAxioma{capturadoE(posE,c)}{ esAtrapadoE?(posE,posContiguas(posE,grilla(c)),c)
 }
 
-\tadAxioma{estaEnEntrada?(posE,g)}{ $\pi_2$(posE) = 0 $\lor$ $\pi_2$(posE) = altura(g)-1
+\tadAxioma{estaEnEntrada?(posE,g)}{ posE.y = 0 $\lor$ posE.y = altura(g)-1
 }
 
-\tadAxioma{distanciaTaxista(pos,posPers)}{ distancia($\pi_1$(pos),$\pi_1$(posPers)) - distancia($\pi_2$(pos),$\pi_2$(posPers))
+\tadAxioma{distanciaTaxista(pos,posPers)}{ distancia(pos.x, posPers.x) - distancia(pos.y, posPers.y)
 }
 
-\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) $=1$ THEN distanciaTaxista(pos,DameUno(conj))
-	ELSE min(distanciaTaxista(pos,DameUno(conj)),menorDistanciaAPos(pos,conj))
+\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) $=1$ THEN distanciaTaxista(pos,dameUno(conj))
+	ELSE min(distanciaTaxista(pos,dameUno(conj)),menorDistanciaAPos(pos,conj))
 	FI
 }
 
 \tadAxioma{personasCercanas(pos,conj)}{ \IF $\emptyset$?(conj) THEN $\emptyset$
 	ELSE{
-		\IF distanciaTaxista(pos,DameUno(conj))$=$menorDistanciaAPos(pos,conj) THEN Ag(DameUno(conjH),personasCercanas(pos,SinUno(conj)))
-		ELSE personasCercanas(pos,SinUno(conj))
+		\IF distanciaTaxista(pos,dameUno(conj))$=$menorDistanciaAPos(pos,conj) THEN Ag(dameUno(conjH),personasCercanas(pos,sinUno(conj)))
+		ELSE personasCercanas(pos,sinUno(conj))
 		FI
 	}
 	FI
 }
 
 \tadAxioma{sancionarAs(conjAs,c)}{ \IF $\emptyset$?(conjAs) THEN asshole(c)
-	ELSE definir(DameUno(conjAs), ($\pi_1$(Obtener(DameUno(conjAs),asshole(c))),$\pi_2$(Obtener(DameUno(conjAs),asshole(c))),$\pi_3$(Obtener(DameUno(conjAs),asshole(c)))$+1$), sancionarAs(SinUno(conjAs),c))
+	ELSE definir(dameUno(conjAs),(Obtener(dameUno(conjAs),asshole(c)).posicion,Obtener(dameUno(conjAs),asshole(c)).capturas, Obtener(dameUno(conjAs),asshole(c)).sanciones +1), sancionarAs(sinUno(conjAs),c))
 	FI
 }
 
 \tadAxioma{eAtrapados(conjContiguo,c)}{ \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
 	ELSE{
-		\IF DameUno(conjContiguo)$\in$estudiantes(c)
+		\IF dameUno(conjContiguo)$\in$estudiantes(c)
 		THEN{
-			\IF esAtrapadoE?(DameUno(conjContiguo), posContiguas(DameUno(conjContiguo),c))
-			THEN Ag(DameUno(conjContiguo),eAtrapados(SinUno(conContiguo),c))
-			ELSE eAtrapados(SinUno(conjContiguo),c)
+			\IF esAtrapadoE?(dameUno(conjContiguo), posContiguas(dameUno(conjContiguo),c))
+			THEN Ag(dameUno(conjContiguo),eAtrapados(sinUno(conContiguo),c))
+			ELSE eAtrapados(sinUno(conjContiguo),c)
 			FI
 		}
-		ELSE eAtrapados(SinUno(conjContiguo),c)
+		ELSE eAtrapados(sinUno(conjContiguo),c)
 		FI
 	}
 	FI
@@ -434,9 +434,9 @@ actualizarAs(nuevapos,definir(p,(nuevapos,$\pi_2$(Obtener(p,asshole(c))),$\pi_3$
 %false-> premia / true -> sanciona
 \tadAxioma{premiarYSancionar(conjP,c)}{ \IF $\emptyset$?(conjAs) THEN asshole(c)
 	ELSE{
-		\IF $\pi_2$(DameUno(conjP))$=$false
-		THEN definir(DameUno(conjP), ($\pi_1$(Obtener(DameUno(conjP),asshole(c)) , $\pi_2$(Obtener(DameUno(conjP),asshole(c))+1,$\pi_3$(Obtener(DameUno(conjP),asshole(c)), premiarYSancionar(SinUno(conjP),c))
-		ELSE definir(DameUno(conjP), ($\pi_1$(Obtener(DameUno(conjP),asshole(c)) , $\pi_2$(Obtener(DameUno(conjP),asshole(c)),$\pi_3$(Obtener(DameUno(conjP),asshole(c))+1, premiarYSancionar(SinUno(conjP),c))
+		\IF $\pi_2$(dameUno(conjP))$=$false
+		THEN definir(dameUno(conjP), (Obtener($\pi_1$dameUno(conjP),asshole(c).posicion, Obtener($\pi_1$dameUno(conjP),asshole(c).capturas +1, Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones), premiarYSancionar(sinUno(conjP),c))
+		ELSE definir(dameUno(conjP), (Obtener($\pi_1$dameUno(conjP),asshole(c)).posicion, Obtener($\pi_1$dameUno(conjP),asshole(c)).capturas, Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones +1, premiarYSancionar(sinUno(conjP),c))
 		FI
 	}
 	FI
