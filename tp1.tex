@@ -151,7 +151,7 @@
 \tadAxioma{asshole(saleEstudiante(c, p))}{asshole(c)}
 \tadAxioma{asshole(movEstudiante(c, p, dir))}{asshole(c)}
 \tadAxioma{asshole(movHippie(c, p))}{asshole(c)}
-\tadAxioma{asshole(movAS(c, p))}{ \IF sanciones((Obtener(p,asshole(c)))) $\geq3$ 
+\tadAxioma{asshole(movAS(c, p))}{ \IF sanciones((Obtener(p,asshole(c)))) $\geq3$
     THEN asshole(c)
     ELSE {
         \- \IF $\neg$hayHippies?(c) THEN movEntradaMasCercana(c, p)
@@ -175,12 +175,12 @@
     ELSE {
     \IF estaVaciaPos?(DameUno(conjpos),c) THEN DameUno(conjpos)
         ELSE nuevaPosicion(posactual, SinUno(conjpos),c)
-        FI  
+        FI
     }
     FI
 }
 
-\tadAxioma{entradasMasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0) 
+\tadAxioma{entradasMasCercanas}{ \IF distancia($\pi_2$(pos), alto(g)-1) $<$ distancia($\pi_2$(pos), 0)
     THEN Ag(($\pi_1$(pos), alto(g)-1) $\emptyset$)
     ELSE {
         \IF distancia($\pi_2$(pos), 0) $<$ distancia($\pi_2$(pos), alto(g)-1)
@@ -210,19 +210,19 @@
     % saber a donde se mueve el hippie
     % preguntar a quien convierte en hippies en esa nueva posicion y restarlos de estudiantes(c)
     % preguntar a quien acorrala el hippie con estudiantesCapturados de la nueva pos y restarlos tambien
-    estudiantes(c) - estudiantesCapturados(c, nuevaPosHippie(c, pos)) - estudiantesFalopeados(c, nuevaPosHippie(c, pos)) 
+    estudiantes(c) - estudiantesCapturados(c, nuevaPosHippie(c, pos)) - estudiantesFalopeados(c, nuevaPosHippie(c, pos))
 }
 \tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c) - estCapturadosPorAS(c, nuevaPosAS(c, id))}
 
 \tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
 \tadAxioma{iterarClaves(g, ass, claves)}{
     \IF $\emptyset$?(claves) THEN true
-    ELSE { 
+    ELSE {
     \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
     \-\- ELSE false
     \-\- FI
     }
-    FI 
+    FI
 }
 \tadAxioma{asValido?(g, as)}{
     posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\
@@ -240,14 +240,14 @@
 
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
-\tadAxioma{nuevaPosAS(c, placa)}{\IF sanciones((Obtener(placa,asshole(c)))) $\geq3$ 
+\tadAxioma{nuevaPosAS(c, placa)}{\IF sanciones((Obtener(placa,asshole(c)))) $\geq3$
     THEN posicion(obtener(placa,asshole(c)))
     ELSE {
         \- \IF $\neg$hayHippies?(c) THEN posicion(obtener(placa, movEntradaMasCercana(c, placa)))
         ELSE posicion(obtener(placa, perseguirHippiesCercanos(placa,c)))
         FI
     }
-    FI 
+    FI
 }
 
 \tadAxioma{cantidadDeHippies(c)}{ $\#$ hippies(c)}
@@ -256,25 +256,60 @@
 
 \tadAxioma{conjuntoDeCapturas(asshole}{\IF $\#$ claves(asshole) $= 1$ THEN capturas(obtener(DameUno(claves(asshole)),asshole)) ELSE Ag(capturas(obtener(DameUno(claves(asshole)))), conjuntoDeCapturas(borrar(DameUno(claves(asshole))), asshole)) FI}
 
-\tadAxioma{DameMasVigilantes(conjCapturas)}{\IF $\#$conjCapturas $= 1$ THEN DameUno(conjCapturas) 
+\tadAxioma{DameMasVigilantes(conjCapturas)}{\IF $\#$conjCapturas $= 1$ THEN DameUno(conjCapturas)
 ELSE max(DameUno(conjCapturas), DameMasVigilantes(SinUno(conjCapturas))) FI }
 
-\tadAxioma{PlacasPosibles(asshole, numeroDeCapturas)}{ \IF $\#$claves(asshole) $= 1$ 
-	THEN DameUno(claves(asshole)) 
+\tadAxioma{PlacasPosibles(asshole, numeroDeCapturas)}{ \IF $\#$claves(asshole) $= 1$
+	THEN DameUno(claves(asshole))
 	ELSE{
 	 \- \IF capturas(DameUno(claves(asshole))) $=$ numeroDeCapturas THEN Ag(DameUno(claves(asshole)), PlacasPosibles(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas))
-	 	 ELSE PlacasPosibles(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas) 
+	 	 ELSE PlacasPosibles(borrar(DameUno(claves(asshole)), asshole), numeroDeCapturas)
 	 	 FI
 	}
 	FI
-} %hay que hacer la restriccion que diga que numeroDeCapturas es un numero perteneciente al conjunto de capturas de todas las claves del Dicc 
+} %hay que hacer la restriccion que diga que numeroDeCapturas es un numero perteneciente al conjunto de capturas de todas las claves del Dicc
 
-\tadAxioma{elDeMenorPlaca(conjPlacas)}{\IF $\#$conjPlacas $= 1$ 
-	THEN DameUno(conjPlacas) 
-	ELSE min(DameUno(conjPlacas), elDeMenorPlaca(SinUno(conjPlacas))) 
-	FI 
+\tadAxioma{elDeMenorPlaca(conjPlacas)}{\IF $\#$conjPlacas $= 1$
+	THEN DameUno(conjPlacas)
+	ELSE min(DameUno(conjPlacas), elDeMenorPlaca(SinUno(conjPlacas)))
+	FI
 }
 
+\tadAxioma{seConvierteEnHippie?(c, pos)}{hayHippiesCerca(posContiguas(pos, grilla(c)), c)}
+\tadAxioma{hayHippiesCerca(posiciones, c)}{\IF $\emptyset$?(posiciones) 
+	THEN false
+	ELSE {
+	\- \IF esHippie?(c, DameUno(posiciones)) 
+		THEN hayOtrosHippies(SinUno(posciciones), c)
+		ELSE hayHippiesCerca(posiciones, c)FI}
+	FI
+}
+\tadAxioma{hayOtrosHippies(posiciones, c)}{\IF $\emptyset$?(posiciones)
+	THEN false
+	ELSE { \- \IF esHippie?(c, DameUno(posiciones))
+			THEN true
+			ELSE hayOtrosHippie(SinUno(posiciones), c) FI }
+	FI
+}
+
+\tadAxioma{nuevaPosHippie(c,pos)}{\IF hayEstudiantes(c) THEN
+	perseguirEstudiantesCercanos(c, pos) ELSE
+	pos
+	FI
+}
+\tadAxioma{hayEstudiantes(c)}{$\#$estudiantes(c) $> 0$}
+
+\tadAxioma{perseguirEstudiantesCercanos(c,pos)}{NuevaPosicion(pos, estudiantesCercanos(estudiantes(c), pos), c)}
+
+\tadAxioma{estudiantesCercanos(estudiantes, posActual)}{ \IF esCercano(DameUno(estudiantes), posActual, estudiantes) 
+	THEN Ag(DameUno(estudiantes), estudiantesCercanos(SinUno(estudiantes), posActual))
+	ELSE estudiantesCercanos(SinUno(estudiantes), posActual)
+	FI
+}
+\tadAxioma{esCercano(objetivo, posActual, conjObjetivos)}{(distancia(objetivo.x, posActual.x) \newline $+$ distancia(objetivo.y, posActual.y)) \newline $=$ elMasCercano(posActual, conjObjetivos)}
+
+\tadAxioma{elMasCercano(posActual, conjObjetivos)}{
+	\IF $\#$conjObjetivos $=$ 1 THEN DameUno(conjObjetivos) ELSE min( (distancia(DameUno(conjObjetivos).x, posActual.x) $+$ distancia(DameUno(conjObjetivos).y, posActual.y)), \newline elMasCercano(posActual, SinUno(conjObjetivos)) ) FI} 
 
 \end{tad}
 
