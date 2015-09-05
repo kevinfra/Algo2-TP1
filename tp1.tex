@@ -121,9 +121,13 @@
 \tadOperacion{entradasMasCercanas}{posicion,grilla}{conj(posicion)}{}
 \tadOperacion{distancia}{nat,nat}{nat}{}
 \tadOperacion{seConvierteEnHippie?}{campus, posicion}{bool}{}
-\tadOperacion{estudiantesCapturados}{campus, posicion}{conj(posicion)}{}
+\tadOperacion{cantHippiesAdyacentes}{campus, posicion}{bool}{}
+\tadOperacion{contarHippies}{campus, conj(posicion)}{nat}{}
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
 \tadOperacion{nuevaPosHippie}{campus, posicion}{posicion}{}
+\tadOperacion{posQueAcercan}{campus, posicion, conj(posicion)}{conj(posicion)}{}
+\tadOperacion{posQueAcercanAUno}{campus, posicion, posicion}{conj(posicion)}{}
+\tadOperacion{iterarDirecciones}{posicion, conj(posicion)}{conj(posicion)}{}
 
 \tadOperacion{cantidadDeHippies}{campus}{nat}{}
 \tadOperacion{cantidadDeEstudiantes}{campus}{nat}{}
@@ -161,6 +165,105 @@
     FI(c,p)
 }
 
+\tadAxioma{estudiantes(crearCampus(g, ass))}{$\emptyset$}
+\tadAxioma{estudiantes(entraEstudiante(c, pos))}{
+    \IF seConvierteEnHippie?(c, pos) THEN estudiantes(c)
+    ELSE Ag(pos, estudiantes(c)
+    FI
+}
+\tadAxioma{estudiantes(entraHippie(c, pos))}{estudiantes(c) - estudiantesFalopeados(c, pos)}
+\tadAxioma{estudiantes(saleEstudiante(c, pos))}{estudiantes(c) - \{pos\}}
+\tadAxioma{estudiantes(movEstudiante(c, ini, fin))}{
+    \IF seConvierteEnHippie?(c, fin) THEN estudiantes(c) - \{ini\} 
+    ELSE Ag(fin, estudiantes(c) - \{ini\}) 
+    FI
+}
+\tadAxioma{estudiantes(movHippie(c, pos))}{
+    % saber a donde se mueve el hippie
+    % preguntar a quien convierte en hippies en esa nueva posicion y restarlos de estudiantes(c)
+    % preguntar a quien acorrala el hippie ceva pos y restarlos tambien
+    estudiantes(c) - estudiantesFalopeados(c, nuevaPosHippie(c, pos)) 
+}
+\tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c)}
+
+\tadAxioma{hippies(crearCampus(g, ass))}{$\emptyset$}
+\tadAxioma{hippies(entraEstudiante(c, pos))}{hippies(c) - hippiesAdiestrados(c, pos) - hippiesCapturados(c, pos)}
+\tadAxioma{hippies(entraHippie(c, pos))}{
+    \IF capturadoH?(c, pos) THEN hippies(c) - hippiesCapturados(c, pos)
+    ELSE Ag(pos, hippies(c) - hippiesCapturados(c, pos)) 
+    FI
+}
+\tadAxioma{hippies(saleEstudiante(c, pos))}{hippies(c)}
+\tadAxioma{hippies(movEstudiante(c, ini, fin))}{
+    \IF seConvierteEnHippie?(c, fin) THEN Ag(fin, hippies(c) - hippiesCapturados(c, fin))
+    ELSE hippies(c) - hippiesCapturados(c, fin)
+    FI
+}
+\tadAxioma{hippies(movHippie(c, pos))}{hippies(c) - hippiesCapturados(c, nuevaPosHippie(c, pos))}
+\tadAxioma{hippies(movAS(c, id))}{hippies(c) - hipiesCapturados(c, nuevaPosAS(c, id))}
+
+\tadAxioma{seConvierteEnHippie?(c, pos)}{cantHippiesAdyacentes(c, pos) $\geq$ 2}
+\tadAxioma{cantHippiesAdyacentes(c, pos)}{contarHippies(c, posContiguas(c, pos))}
+\tadAxioma{contarHippies(c, contiguas)}{
+    \IF $\emptyset$?(contiguas) THEN 0
+    ELSE{
+        contarHippies(c, sinUno(contiguas)) + \\\IF esHippie?(c, dameUno(contiguas)) THEN 1 ELSE 0 FI
+    }
+    FI
+}
+
+\tadAxioma{estudiantesFalopeados(c, pos)}{buscarFalopeados(c, posContiguas(c, pos))}
+\tadAxioma{buscarFalopeados(c, contiguas}{
+    \IF $\emptyset$?(contiguas) THEN $\emptyset$
+    ELSE {
+        \IF seConvierteEnHippie(c, dameUno(contiguas)) THEN Ag(dameUno(contiguas), \\buscarFalopeados(c, sinUno(contiguas)))
+        ELSE buscarFalopeados(c, sinUno(contiguas))
+        FI
+    }
+    FI
+}
+
+\tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
+\tadAxioma{iterarClaves(g, ass, claves)}{
+    \IF $\emptyset$?(claves) THEN true
+    ELSE { 
+    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
+    \-\- ELSE false
+    \-\- FI
+    }
+    FI 
+}
+\tadAxioma{asValido?(g, as)}{
+    posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\sinCapturas?(as) $\land$ sinSanciones?(as)
+}
+\tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
+\tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
+\tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
+\tadAxioma{posNoRepetida?(ass, claves, pos)}{
+    \IF $\emptyset$?(claves) THEN true
+    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\posNoRepetida?(ass, sinUno(claves), pos)
+    FI
+}
+
+\tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
+
+\tadAxioma{posSinAS?(c, pos)}{ pos $\notin$ conjuntoPosAs(claves(asshole(c),asshole(c)))}
+
+\tadAxioma{esHippie?(c, pos)}{ pos $\in$ hippies(c)}
+
+\tadAxioma{esEstudiante?(c, pos)}{ pos $\in$ estudiantes(c)}
+
+\tadAxioma{esEntrada?(c,pos)}{ pos.y = 0 $\lor$ pos.y = alto(grilla(c)) - 1 }
+
+\tadAxioma{adyacentes?(pos1, pos2)}{ 
+    (pos1.y = pos2.y + 1 $\land$ pos1.x = pos2.x) $\lor$ \\
+    (pos2.y = pos1.y + 1 $\land$ pos1.x = pos2.x) $\lor$ \\    
+    (pos1.x = pos2.x + 1 $\land$ pos1.y = pos2.y) $\lor$ \\    
+    (pos2.x = pos1.x + 1 $\land$ pos1.y = pos2.y)        
+}
+
+\tadAxioma{esAS?(c, p)}{ def?(p,asshole(c))}
+
 \tadAxioma{posAS(c, p)}{$pi_1$(Obtener(p,asshole(c)))}
 
 \tadAxioma{hayHippies?(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
@@ -193,74 +296,25 @@
 
 \tadAxioma{distancia(n,m)}{\IF $m-n < 0$ THEN $-(m-n)$ ELSE $m-n$ FI}
 
-\tadAxioma{estudiantes(crearCampus(g, ass))}{$\emptyset$}
-\tadAxioma{estudiantes(entraEstudiante(c, pos))}{
-    \IF seConvierteEnHippie?(c, pos) THEN estudiantes(c) - estudiantesCapturados(c, pos)
-    ELSE Ag(pos, estudiantes(c) - estudiantesCapturados(c, pos))
+\tadAxioma{posQueAcercan(c, pos, objetivos)}{
+    \IF $\emptyset$?(objetivos) THEN $\emptyset$
+    ELSE Ag(posQueAcercanAUno(c, pos, dameUno(objetivos)), \\posQueAcercan(pos, sinUno(objetivos)))
     FI
 }
-\tadAxioma{estudiantes(entraHippie(c, pos))}{estudiantes(c) - estudiantesCapturados(c, pos) - \\estudiantesFalopeados(c, pos)}
-\tadAxioma{estudiantes(saleEstudiante(c, pos))}{estudiantes(c) - \{pos\}}
-\tadAxioma{estudiantes(movEstudiante(c, ini, fin))}{
-    \IF seConvierteEnHippie?(c, fin) THEN estudiantes(c) - \{ini\} - estudiantesCapturados(c, fin)
-    ELSE Ag(fin, estudiantes(c) - \{ini\} - estudiantesCapturados(c, fin))
-    FI
-}
-\tadAxioma{estudiantes(movHippie(c, pos))}{
-    % saber a donde se mueve el hippie
-    % preguntar a quien convierte en hippies en esa nueva posicion y restarlos de estudiantes(c)
-    % preguntar a quien acorrala el hippie con estudiantesCapturados de la nueva pos y restarlos tambien
-    estudiantes(c) - estudiantesCapturados(c, nuevaPosHippie(c, pos)) - estudiantesFalopeados(c, nuevaPosHippie(c, pos))
-}
-\tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c) - estCapturadosPorAS(c, nuevaPosAS(c, id))}
 
-\tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
-\tadAxioma{iterarClaves(g, ass, claves)}{
-    \IF $\emptyset$?(claves) THEN true
+\tadAxioma{posQueAcercanAUno(c, pos, objetivo)}{
+    iterarDirecciones(objetivo, posContiguas(c, pos), \\distanciaTaxista(pos, objetivo))
+}
+
+\tadAxioma{iterarDirs(objetivo, contiguas, dist)}{
+    \IF $\emptyset$?(contiguas) THEN $\emptyset$
     ELSE {
-    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
-    \-\- ELSE false
-    \-\- FI
-    }
+        \IF distanciaTaxista(objetivo, dameUno(contiguas)) < dist THEN Ag(dameUno(contiguas), \\iterarDirecciones(objetivo, sinUno(contiguas), dist))
+        ELSE iterarDirecciones(objetivo, sinUno(contiguas), dist)
+        FI
+    } 
     FI
 }
-\tadAxioma{asValido?(g, as)}{
-    posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\
-    sinCapturas?(as) $\land$ sinSanciones?(as)
-}
-\tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
-\tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
-\tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
-\tadAxioma{posNoRepetida?(ass, claves, pos)}{
-    \IF $\emptyset$?(claves) THEN true
-    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\
-    posNoRepetida?(ass, sinUno(claves), pos)
-    FI
-}
-
-\tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
-
-\tadAxioma{posSinAS?(c, pos)}{ pos $\notin$ conjuntoPosAs(claves(asshole(c),asshole(c)))
-}
-
-\tadAxioma{esHippie?(c, pos)}{ pos $\in$ hippies(c)
-}
-
-\tadAxioma{esEstudiante?(c, pos)}{ pos $\in$ estudiantes(c)
-}
-
-\tadAxioma{esEntrada?(c,pos)}{ pos.y = 0 $\lor$ pos.y = alto(grilla(c)) - 1 
-}
-
-\tadAxioma{esAS?(c, p)}{ def?(p,asshole(c))
-}
-
-\tadAxioma{adyacentes?(pos1, pos2)}{ (pos1.y = pos2.y + 1 $\land$ pos1.x = pos2.x)
-     $\lor$ (pos2.y = pos1.y + 1 $\land$ pos1.x = pos2.x)    
-     $\lor$ (pos1.x = pos2.x + 1 $\land$ pos1.y = pos2.y)    
-     $\lor$ (pos2.x = pos1.x + 1 $\land$ pos1.y = pos2.y)        
-}
-
 
 \tadAxioma{nuevaPosAS(c, placa)}{\IF sanciones((Obtener(placa,asshole(c)))) $\geq3$
     THEN posicion(obtener(placa,asshole(c)))
@@ -347,7 +401,8 @@ ELSE max(dameUno(conjCapturas), numCapturasMax(sinUno(conjCapturas))) FI }
 \section{Notas}
 
 Cuando un estudiante entra no puede ser atrapado por un AS ya que tiene libertad de movimiento. Puede salir por la entrada.
-\newline estudiantesCapturados devuelve un conunto de los estudiantes que fueron atrapados por concecuencia de que algun estudiante o hippie se haya movido a la posicion pasada como parametro, y que eso causara que quedara encerrado por un AS
 \newline estudiantesFalopeados devuelve un conunto de los estudiantes que fueron convertidos al hippismo por concecuencia de que un hippie apareciera en la posicion pasada como parametro
-\newline estCapturadosPorAS devuelve el conjunto de estudiantes que un AS atrapa en la posicion pasada como parametro
+\newline hippiesAdiestrados devuelve un conunto de los hippies que fueron convertidos en estudiante por concecuencia de que un estudiante apareciera en la posicion pasada como parametro
+\newline hippiesCapturados devuelve un conunto de los hippies que fueron atrapados por concecuencia de que algo se mueva o aparezca en la posicion pasada como parametro
+\newline posQueAcercan toma una posicion, que es donde estoy parado, y un conjunto de posiciones, a las cuales voy a querer acercarme. Lo que devuelve es un conjunto de posiciones contiguas que se encuentran a menor distancia del objetivo que la posicion en la que estoy parado
 \end{document}
