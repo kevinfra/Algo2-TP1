@@ -192,9 +192,10 @@
 
 \tadAxioma{hayHippies?(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
 
-\tadAxioma{movEntradaCercana(c, p)}{\IF nuevaPosicion(posAS(c, p),posQueAcercan(c,posAS(c,p),entradasCercanas(posAS(c, p),grilla(c)))= posAS(c, p)
+\tadAxioma{movEntradaCercana(c, p)}{
+	\IF nuevaPosicion(posAS(c, p), posQueAcercan(c,posAS(c,p),\\ entradasCercanas(posAS(c, p),grilla(c)))= posAS(c, p)
     THEN asshole(c)
-    ELSE moverseYActualizar(p,nuevaPosicion(posAS(c, p),posQueAcercan(c,posAS(c,p),entradasCercanas(posAS(c, p),grilla(c))),c)
+    ELSE moverseYActualizar(p,nuevaPosicion(posAS(c, p),\\ posQueAcercan(c,posAS(c,p),entradasCercanas(posAS(c,p), grilla(c))),c)
     FI
 }
 
@@ -268,17 +269,17 @@
 \tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
 
 \tadAxioma{movYActualizarAS(p,nuevapos,c)}{
-actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener(p,asshole(c)).sanciones),asshole(c)),c)
+actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\ Obtener(p,asshole(c)).sanciones), asshole(c)),c)
 }
 
 \tadAxioma{actualizarAs(pos,dic,c)}{
 	\IF $\neg$hayHippiesAtrapados(pos,c) $\land \neg$hayEstudiantesAtrapados(pos,c) THEN dic
 	ELSE {
 		\IF hayHippiesAtrapados(pos,c) $\land \neg$hayEstudiantesAtrapados(pos,c) 
-		THEN premiarAs(asParaModificar(periferia(hAtrapados(posContiguas(pos ,grilla(c)),c),c),c),c)
+		THEN premiarAs(asParaModificar(periferia(hAtrapados(\\ posContiguas(pos ,grilla(c)), c), c), c), c)
 		ELSE{
-			\IF	$\neg$hayHippiesAtrapados(pos,c) $\land$ hayEstudiantesAtrapados(pos,c) THEN sancionarAs(asParaModificar(periferia(eAtrapados(posContiguas(pos ,grilla(c)),c),c),c),c)
-			ELSE premiarYSancionarAs(asParaModificar(periferia(hAtrapados(posContiguas(pos ,grilla(c)),c),c),c), asSancPrem(asParaModificar(periferia(eAtrapados(posContiguas(pos ,grilla(c)),c),c),c),c),c)
+			\IF	$\neg$hayHippiesAtrapados(pos,c)$\land$hayEstudiantesAtrapados(pos,c) THEN sancionarAs(asParaModificar(periferia\\ (eAtrapados(posContiguas(pos ,grilla(c)), c), c), c), c)
+			ELSE premiarYSancionarAs(asParaModificar(periferia\\ (hAtrapados(posContiguas(pos, grilla(c)), c), c), c),\\  asSancPrem(asParaModificar(periferia\\ (eAtrapados(posContiguas(pos ,grilla(c)), c), c), c), c), c)
 			FI
 		}
 		FI
@@ -304,14 +305,14 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 
 \tadAxioma{conjuntoPosAs(conjclaves,dic)}{
 	\IF $\emptyset$?(conjclaves) THEN $\emptyset$
-	ELSE Ag(Obtener(dameUno(conjclaves),dic).posicion, conjuntoPosAs(sinUno(conjclaves),dic)
+	ELSE Ag(Obtener(dameUno(conjclaves),dic).posicion,\\ conjuntoPosAs(sinUno(conjclaves),dic)
 	FI
 }
 
 \tadAxioma{esAtrapadoH?(posh,conjcont,c)}{
 	\IF hayPosVacia?(conjcont,c) THEN false
 	ELSE{
-		\IF dameUno(conjcont) $\in$ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) THEN true
+		\IF dameUno(conjcont) $\in$\\ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) THEN true
 		ELSE esAtrapadoH?(posh,sinUno(conjcont),c)
 		FI	
 	}
@@ -334,7 +335,7 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 \tadAxioma{esAtrapadoE?(posE,conjcont,c)}{
 	\IF hayPosVacia?(conjcont,c) $\lor$ estaEnEntrada(posE,grilla(c)) THEN false
 	ELSE {
-		\IF dameUno(conjcont) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c)) THEN true
+		\IF dameUno(conjcont) $\in$\\ conjuntoPosAs(claves(asshole(c),asshole(c)) THEN true
 		ELSE esAtrapadoE?(posE,sinUno(conjcont),c)
 		FI	
 	}
@@ -343,13 +344,13 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 
 \tadAxioma{premiarAs(conjAs,c)}{
 	\IF $\emptyset$?(conjAs) THEN asshole(c)
-	ELSE definir(dameUno(conjAs), ($\pi_1$(Obtener(dameUno(conjAs),asshole(c)) , $\pi_2$(Obtener(dameUno(conjAs),asshole(c))+1,$\pi_3$(Obtener(dameUno(conjAs),asshole(c)), premiarAs(sinUno(conjAs),c))
+	ELSE definir(dameUno(conjAs),\\ (Obtener(dameUno(conjAs),asshole(c)).posicion,\\ Obtener(dameUno(conjAs),asshole(c)).capturas +1,\\ Obtener(dameUno(conjAs),asshole(c)).sanciones),\\ premiarAs(sinUno(conjAs),c))
 	FI
 }
 
 \tadAxioma{periferia(conj,c)}{
 	\IF $\emptyset$?(conjAs) THEN $\emptyset$
-	ELSE posValidaCont(posContigua(dameUno(conj)),grilla(c)) $\cup$ periferia(sinUno(conj),c)
+	ELSE posValidaCont(posContigua(dameUno(conj)),grilla(c))\\ $\cup$ periferia(sinUno(conj),c)
 	FI
 }
 
@@ -362,8 +363,8 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 \tadAxioma{asParaModificar(conjtodo,c)}{
 	\IF $\emptyset$?(conjAs) THEN $\emptyset$
 	ELSE{
-		\IF dameUno(conjtodo) $\in$ conjuntoPosAs(claves(asshole(c),asshole(c))
-		THEN Ag(placaDelAs(dameUno(conjtodo),claves(asshole(c),asshole(c)),asParaModificar(sinUno(conjtodo),c))
+		\IF dameUno(conjtodo) $\in$\\ conjuntoPosAs(claves(asshole(c),asshole(c))
+		THEN Ag(placaDelAs(dameUno(conjtodo),claves(asshole(c),asshole(c)),\\ asParaModificar(sinUno(conjtodo),c))
 		ELSE asParaModificar(sinUno(conjtodo),c)
 		FI
 	}
@@ -374,8 +375,8 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 	ELSE{
 		\IF dameUno(conjContiguo)$\in$hippies(c)
 		THEN{
-			\IF esAtrapadoH?(dameUno(conjContiguo), posContiguas(dameUno(conjContiguo),c))
-			THEN Ag(dameUno(conjContiguo),hAtrapados(sinUno(conContiguo),c))
+			\IF esAtrapadoH?(dameUno(conjContiguo),\\ posContiguas(dameUno(conjContiguo),c))
+			THEN Ag(dameUno(conjContiguo),\\ hAtrapados(sinUno(conContiguo),c))
 			ELSE hAtrapados(sinUno(conjContiguo),c)
 			FI
 		}
@@ -397,14 +398,14 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 \tadAxioma{distanciaTaxista(pos,posPers)}{ distancia(pos.x, posPers.x) - distancia(pos.y, posPers.y)
 }
 
-\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) $=1$ THEN distanciaTaxista(pos,dameUno(conj))
-	ELSE min(distanciaTaxista(pos,dameUno(conj)),menorDistanciaAPos(pos,conj))
+\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) =1 THEN distanciaTaxista(pos,dameUno(conj))
+	ELSE min(distanciaTaxista(pos,dameUno(conj)),\\ menorDistanciaAPos(pos,conj))
 	FI
 }
 
 \tadAxioma{personasCercanas(pos,conj)}{ \IF $\emptyset$?(conj) THEN $\emptyset$
 	ELSE{
-		\IF distanciaTaxista(pos,dameUno(conj))$=$menorDistanciaAPos(pos,conj) THEN Ag(dameUno(conjH),personasCercanas(pos,sinUno(conj)))
+		\IF distanciaTaxista(pos,dameUno(conj)) =\\ menorDistanciaAPos(pos,conj) THEN Ag(dameUno(conjH),personasCercanas(pos,sinUno(conj)))
 		ELSE personasCercanas(pos,sinUno(conj))
 		FI
 	}
@@ -412,16 +413,16 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 }
 
 \tadAxioma{sancionarAs(conjAs,c)}{ \IF $\emptyset$?(conjAs) THEN asshole(c)
-	ELSE definir(dameUno(conjAs),(Obtener(dameUno(conjAs),asshole(c)).posicion,Obtener(dameUno(conjAs),asshole(c)).capturas, Obtener(dameUno(conjAs),asshole(c)).sanciones +1), sancionarAs(sinUno(conjAs),c))
+	ELSE definir(dameUno(conjAs),\\ (Obtener(dameUno(conjAs),asshole(c)).posicion,\\ Obtener(dameUno(conjAs),asshole(c)).capturas,\\  Obtener(dameUno(conjAs),asshole(c)).sanciones +1),\\ sancionarAs(sinUno(conjAs),c))
 	FI
 }
 
 \tadAxioma{eAtrapados(conjContiguo,c)}{ \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
 	ELSE{
-		\IF dameUno(conjContiguo)$\in$estudiantes(c)
+		\IF dameUno(conjContiguo) $\in$ estudiantes(c)
 		THEN{
-			\IF esAtrapadoE?(dameUno(conjContiguo), posContiguas(dameUno(conjContiguo),c))
-			THEN Ag(dameUno(conjContiguo),eAtrapados(sinUno(conContiguo),c))
+			\IF esAtrapadoE?(dameUno(conjContiguo),\\ posContiguas(dameUno(conjContiguo),c))
+			THEN Ag(dameUno(conjContiguo),\\ eAtrapados(sinUno(conContiguo),c))
 			ELSE eAtrapados(sinUno(conjContiguo),c)
 			FI
 		}
@@ -435,15 +436,15 @@ actualizarAs(nuevapos,definir(p,(nuevapos,Obtener(p,asshole(c)).capturas,Obtener
 \tadAxioma{premiarYSancionar(conjP,c)}{ \IF $\emptyset$?(conjAs) THEN asshole(c)
 	ELSE{
 		\IF $\pi_2$(dameUno(conjP))$=$false
-		THEN definir(dameUno(conjP), (Obtener($\pi_1$dameUno(conjP),asshole(c).posicion, Obtener($\pi_1$dameUno(conjP),asshole(c).capturas +1, Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones), premiarYSancionar(sinUno(conjP),c))
-		ELSE definir(dameUno(conjP), (Obtener($\pi_1$dameUno(conjP),asshole(c)).posicion, Obtener($\pi_1$dameUno(conjP),asshole(c)).capturas, Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones +1, premiarYSancionar(sinUno(conjP),c))
+		THEN definir(dameUno(conjP),\\ (Obtener($\pi_1$dameUno(conjP),asshole(c).posicion,\\ Obtener($\pi_1$dameUno(conjP),asshole(c).capturas +1,\\ Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones),\\  premiarYSancionar(sinUno(conjP),c))
+		ELSE definir(dameUno(conjP),\\ (Obtener($\pi_1$dameUno(conjP),asshole(c)).posicion,\\  Obtener($\pi_1$dameUno(conjP),asshole(c)).capturas,\\ Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones+1,\\  premiarYSancionar(sinUno(conjP),c))
 		FI
 	}
 	FI
 }
 
-\tadAxioma{perseguirHippies(p,c)}{ \IF nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p), hippiesMasCercanos(posAS(c,p), hippies(c))$=$posAS(c,p) THEN asshole(c)
-ELSE movYActualizarAS(p, nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p), hippiesMasCercanos(posAS(c,p), hippies(c)),c)
+\tadAxioma{perseguirHippies(p,c)}{ \IF nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p),\\ hippiesMasCercanos(posAS(c,p), hippies(c))$=$posAS(c,p) THEN asshole(c)
+ELSE movYActualizarAS(p,\\ nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p),\\ hippiesMasCercanos(posAS(c,p), hippies(c)),c)
 FI
 }
 
@@ -451,12 +452,12 @@ FI
 	\IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$
 	ELSE{
 		\IF $\neq \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 
-		THEN Ag( (placaDelAs(dameUno(conjPrem),claves(asshole(c)),asshole(c)),false), asSancPrem(sinUno(conjPrem),conjSanc,c))
+		THEN Ag(\\ (placaDelAs(dameUno(conjPrem),\\ claves(asshole(c)),asshole(c)),false),\\ asSancPrem(sinUno(conjPrem),conjSanc,c))
 		ELSE{
 			\IF $\emptyset$?(conjPrem)$\land \neq \emptyset$?(conjSanc)
-			THEN Ag( (placaDelAs(dameUno(conjSanc),claves(asshole(c)),asshole(c)),false), asSancPrem(conjPrem,sinUno(conjSanc),c))
+			THEN Ag(\\ (placaDelAs(dameUno(conjSanc),\\ claves(asshole(c)),asshole(c)),false),\\ asSancPrem(conjPrem,sinUno(conjSanc),c))
 			ELSE{
-					Ag((placaDelAs(dameUno(conjPrem),claves(asshole(c)),asshole(c)),false), Ag((placaDelAs(dameUno(conjSanc),claves(asshole(c)),asshole(c)),false), asSancPrem(sinUno(conjPrem),sinUno(conjSanc),c)))
+					Ag((placaDelAs(dameUno(conjPrem),\\ claves(asshole(c)),asshole(c)),false), Ag((placaDelAs(dameUno(conjSanc),\\ claves(asshole(c)),asshole(c)),false),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc),c)))
 			}
 			FI
 		}
