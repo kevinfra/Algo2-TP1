@@ -132,13 +132,13 @@
 \tadOperacion{posContiguas}{posicion,grilla}{conj(posicion)}{}
 \tadOperacion{posValidasCont}{conj(posicion),grilla}{conj(posicion)}{}
 \tadOperacion{conjuntoPosAs}{conj(placa),dicc(placa,as)}{conj(posicion)}{}
-\tadOperacion{esAtrapadoH?}{posicion,conj(posicion),campus}{bool}{}
+\tadOperacion{esAtrapadoH?}{conj(posicion),campus}{bool}{}
 \tadOperacion{hayPosVacia?}{conj(posicion),campus}{bool}{}
 \tadOperacion{hayEstudiantesAtrapados}{posicion,campus}{bool}{}
 \tadOperacion{esAtrapadoE?}{posicion,conj(posicion),campus}{bool}{}
 
 \tadOperacion{premiarAs}{multiconj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
-\tadOperacion{periferia}{multiconj(posicion),campus}{conj(posicion)}{}
+\tadOperacion{periferia}{conj(posicion),campus}{multiconj(posicion)}{}
 \tadOperacion{placaDelAs}{posicion/pos,conj(placa)/conjplacas,dicc(placa,as)/dic}{placa}{pos $\in$ conjuntoPosAs(conjplacas,dic)}
 \tadOperacion{asParaModificar}{multiconj(posicion),campus}{multiconj(placa)}{}
 \tadOperacion{hAtrapados}{conj(posicion),campus}{conj(posicion)}{}
@@ -147,7 +147,7 @@
 \tadOperacion{capturadoE}{posicion,campus}{bool}{}
 \tadOperacion{estaEnEntrada?}{posicion,grilla}{bool}{}
 
-\tadOperacion{distanciaTaxista}{posicion,posicion}{nat}{}
+\tadOperacion{distTaxi}{posicion,posicion}{nat}{}
 \tadOperacion{menorDistanciaAPos}{posicion/pos,con(posicion)/conjunto}{nat}{$\#$conjunto$>0$}
 \tadOperacion{personasCercanas}{posicion,conj(posicion)}{conj(posicion)}{}
 \tadOperacion{sancionarAs}{multiconj(placa)/placas,campus/c}{dicc(placa,as)}{placas $\subseteq$ claves(asshole(c))}
@@ -190,7 +190,7 @@
 
 \tadAxioma{posAS(c, p)}{Obtener(p,asshole(c)).poscion}
 
-\tadAxioma{hayHippies?(c)}{\IF $\#$Hippies(c) $> 0$ THEN true ELSE false FI}
+\tadAxioma{hayHippies?(c)}{$\#$Hippies(c) $> 0$}
 
 \tadAxioma{movEntradaCercana(c, p)}{
 	\IF nuevaPosicion(posAS(c, p), posQueAcercan(c,posAS(c,p),\\ entradasCercanas(posAS(c, p),grilla(c)))= posAS(c, p)
@@ -309,12 +309,16 @@ actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\
 	FI
 }
 
-\tadAxioma{esAtrapadoH?(posh,conjcont,c)}{
-	\IF hayPosVacia?(conjcont,c) THEN false
+\tadAxioma{esAtrapadoH?(conjcont,c)}{
+	\IF $\emptyset$?(conjclaves) THEN false
 	ELSE{
-		\IF dameUno(conjcont) $\in$\\ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) THEN true
-		ELSE esAtrapadoH?(posh,sinUno(conjcont),c)
-		FI	
+		\IF hayPosVacia?(conjcont,c) THEN false
+		ELSE{
+			\IF dameUno(conjcont) $\in$\\ conjuntoPosAs(claves(Asshole(c)),Asshole(c)) THEN true
+			ELSE esAtrapadoH?(sinUno(conjcont),c)
+			FI
+		}
+		FI
 	}
 	FI
 }
@@ -333,13 +337,19 @@ actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\
 }
 
 \tadAxioma{esAtrapadoE?(posE,conjcont,c)}{
-	\IF hayPosVacia?(conjcont,c) $\lor$ estaEnEntrada(posE,grilla(c)) THEN false
-	ELSE {
-		\IF dameUno(conjcont) $\in$\\ conjuntoPosAs(claves(asshole(c),asshole(c)) THEN true
-		ELSE esAtrapadoE?(posE,sinUno(conjcont),c)
-		FI	
+	\IF $\emptyset$?(conjcont) THEN false
+	ELSE{
+		\IF hayPosVacia?(conjcont,c) $\lor$ estaEnEntrada(posE,grilla(c)) THEN false
+		ELSE {
+			\IF dameUno(conjcont) $\in$\\ conjuntoPosAs(claves(asshole(c),asshole(c)) THEN true
+			ELSE esAtrapadoE?(posE,sinUno(conjcont),c)
+			FI	
+		}
+		FI
 	}
 	FI
+	
+	
 }
 
 \tadAxioma{premiarAs(conjAs,c)}{
@@ -350,7 +360,7 @@ actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\
 
 \tadAxioma{periferia(conj,c)}{
 	\IF $\emptyset$?(conjAs) THEN $\emptyset$
-	ELSE posValidaCont(posContigua(dameUno(conj)),grilla(c))\\ $\cup$ periferia(sinUno(conj),c)
+	ELSE posContigua(dameUno(conj),grilla(c))\\ $\cup$ periferia(sinUno(conj),c)
 	FI
 }
 
@@ -375,7 +385,7 @@ actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\
 	ELSE{
 		\IF dameUno(conjContiguo)$\in$hippies(c)
 		THEN{
-			\IF esAtrapadoH?(dameUno(conjContiguo),\\ posContiguas(dameUno(conjContiguo),c))
+			\IF esAtrapadoH?(posContiguas(dameUno(conjContiguo),c))
 			THEN Ag(dameUno(conjContiguo),\\ hAtrapados(sinUno(conContiguo),c))
 			ELSE hAtrapados(sinUno(conjContiguo),c)
 			FI
@@ -386,7 +396,7 @@ actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\
 	FI
 }
 
-\tadAxioma{capturadoH(posH,c)}{ esAtrapadoH?(posH,posContiguas(posH,grilla(c)),c)
+\tadAxioma{capturadoH(posH,c)}{ esAtrapadoH?(posContiguas(posH,grilla(c)),c)
 }
 
 \tadAxioma{capturadoE(posE,c)}{ esAtrapadoE?(posE,posContiguas(posE,grilla(c)),c)
@@ -395,17 +405,17 @@ actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\
 \tadAxioma{estaEnEntrada?(posE,g)}{ posE.y = 0 $\lor$ posE.y = altura(g)-1
 }
 
-\tadAxioma{distanciaTaxista(pos,posPers)}{ distancia(pos.x, posPers.x) - distancia(pos.y, posPers.y)
+\tadAxioma{distTaxi(pos,posPers)}{ distancia(pos.x, posPers.x) + distancia(pos.y, posPers.y)
 }
 
-\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) =1 THEN distanciaTaxista(pos,dameUno(conj))
-	ELSE min(distanciaTaxista(pos,dameUno(conj)),\\ menorDistanciaAPos(pos,conj))
+\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) =1 THEN distTaxi(pos,dameUno(conj))
+	ELSE min(distTaxi(pos,dameUno(conj)),\\ menorDistanciaAPos(pos,conj))
 	FI
 }
 
 \tadAxioma{personasCercanas(pos,conj)}{ \IF $\emptyset$?(conj) THEN $\emptyset$
 	ELSE{
-		\IF distanciaTaxista(pos,dameUno(conj)) =\\ menorDistanciaAPos(pos,conj) THEN Ag(dameUno(conjH),personasCercanas(pos,sinUno(conj)))
+		\IF distTaxi(pos,dameUno(conj)) =\\ menorDistanciaAPos(pos,conj) THEN Ag(dameUno(conjH),personasCercanas(pos,sinUno(conj)))
 		ELSE personasCercanas(pos,sinUno(conj))
 		FI
 	}
@@ -433,10 +443,10 @@ actualizarAs(nuevapos, definir(p,\\ (nuevapos, Obtener(p,asshole(c)).capturas,\\
 }
 
 %false-> premia / true -> sanciona
-\tadAxioma{premiarYSancionar(conjP,c)}{ \IF $\emptyset$?(conjAs) THEN asshole(c)
+\tadAxioma{premiarYSancionar(conjP,c)}{ \IF $\emptyset$?(conjP) THEN asshole(c)
 	ELSE{
 		\IF $\pi_2$(dameUno(conjP))$=$false
-		THEN definir(dameUno(conjP),\\ (Obtener($\pi_1$dameUno(conjP),asshole(c).posicion,\\ Obtener($\pi_1$dameUno(conjP),asshole(c).capturas +1,\\ Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones),\\  premiarYSancionar(sinUno(conjP),c))
+		THEN definir($\pi_1$(dameUno(conjP)),\\ (Obtener($\pi_1$dameUno(conjP),asshole(c).posicion,\\ Obtener($\pi_1$dameUno(conjP),asshole(c).capturas +1,\\ Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones),\\  premiarYSancionar(sinUno(conjP),c))
 		ELSE definir(dameUno(conjP),\\ (Obtener($\pi_1$dameUno(conjP),asshole(c)).posicion,\\  Obtener($\pi_1$dameUno(conjP),asshole(c)).capturas,\\ Obtener($\pi_1$dameUno(conjP),asshole(c)).sanciones+1,\\  premiarYSancionar(sinUno(conjP),c))
 		FI
 	}
@@ -511,6 +521,26 @@ FI
 \end{tad}
 
 \section{Notas}
+
+\begin{itemize}
+
+\item nuevaPosicion toma el conjunto de posiciones a las que deberia moverse y lo va iterando hasta que encuentra una en la que no hay nada y la devuelve. Si el conjunto de posiciones que toma tiene todas las posiciones ocupadas devuelve la que esta (no se mueve).
+
+\item movYActualizarAS hace mover al as a la nueva posicion (si es que la hay, se queda con la que tiene), y le pasa esa posicion, el diccionario definiendo al as con esa nueva posicion y el campus a actualizarAs.
+
+\item actualizarAs ya me toma al diccionario con el as en la nueva posicion y revisa si hay hippies o estudiantes atrapados, si hay hippies atrapados premia a los as que los atraparon, si hay estudiantes atrapados sanciona a los as que los atraparon.
+
+\item periferia: devuelve todas las posiciones de al rededor de cada una de las posiciones del conjunto que toma, sirve para ver que tiene al rededor el estudiante o el hippie atrapado.
+
+\item asParaModificar: agarra el conjunto que devuelve periferia y busca los as a los que habria que agregarle una sancion o una captura
+
+\item distTaxi: devuelve la distancia a la que esta una persona de otra en el campus teniendo en cuenta la geometria del taxista
+
+\item premiarYSancionar: es el caso en que mover un as hace que queden atrapados hippies y estudiantes y se tenga que sancionar y premiar a la vez. Lo que hicimos es que tome un multiconjunto de tuplas de dos posiciones (placa, bool) si el bool es false se premia al as, sino se sanciona a ese as.
+
+\item asSancPrem: lo que hace esta funcion es tomar un multiconjunto de posiciones de los as que hay que premiar y otro multiconjunto de posiciones de as para los que hay que sancionar y por cada uno de los elementos lo mete en una tupla con el bool respectivo de premiar y sancionar (si es para sancionar agrega un true en la tupla, si es para premiar agrega un false) y con la placa del as.
+
+\end{itemize}
 
 Cuando un estudiante entra no puede ser atrapado por un AS ya que tiene libertad de movimiento. Puede salir por la entrada.
 \newline estudiantesCapturados devuelve un conunto de los estudiantes que fueron atrapados por concecuencia de que algun estudiante o hippie se haya movido a la posicion pasada como parametro, y que eso causara que quedara encerrado por un AS
