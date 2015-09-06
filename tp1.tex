@@ -77,7 +77,7 @@
 
 \tadIgualdadObservacional{c1}{c2}{campus}{$(grilla(c1) \igobs grilla(c2))\ \land$\\ $(agentes(c1) \igobs agentes(c2))\ \land$\\ $(estudiantes(c1) \igobs estudiantes(c2)) \ \land$\\ $(hippies(c1) \igobs hippies(c2))$}
 
-\tadAlinearFunciones{posNoRepetida?}{campus/c, posicion/p, direccion/dir}{}
+\tadAlinearFunciones{posNoRepetida?}{dicc(placa, as), conj(placa), posicion}{}
 
 % Generadores
 \tadGeneradores
@@ -106,7 +106,7 @@
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
 \tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
-\tadOperacion{posNoRepetida?}{ass, conj(placa), posicion}{bool}{}
+\tadOperacion{posNoRepetida?}{dicc(placa, as), conj(placa), posicion}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
 
 \tadAlinearFunciones{hayEstudiantesAtrapados?}{posicion,conj(placa),dicc(placa,as)}{}
@@ -164,6 +164,9 @@
 
 \tadOperacion{seConvierteEnHippie?}{campus, posicion}{bool}{}
 \tadOperacion{cantHippiesAdyacentes}{campus, posicion}{bool}{}
+
+\tadAlinearFunciones{cantidadDeEstudiantes}{campus, conj(posicion)}{}
+
 \tadOperacion{contarHippies}{campus, conj(posicion)}{nat}{}
 
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
@@ -282,6 +285,9 @@
     % preguntar a quien acorrala el hippie ceva pos y restarlos tambien
     estudiantes(c) - estudiantesFalopeados(c, nuevaPosHippie(c, pos)) 
 }
+
+\tadAlinearAxiomas{hippies(movEstudiante(c, ini, fin))}
+
 \tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c)}
 
 \tadAxioma{hippies(crearCampus(g, ass))}{$\emptyset$}
@@ -315,7 +321,7 @@
     FI
 }
 \tadAxioma{hayHippiesAtrapados(pos,c)}{ $\emptyset$?(hAtrapados(posContiguas(pos, grilla(c)), c))}
-\tadAxioma{posContiguas(pos,g)}{ posValidasCont(Ag((pos.x+1,pos.y), Ag((pos.x-1,pos.y), Ag((pos.x,pos.y+1), Ag((pos.x,pos.y 1), $\emptyset$),g)}
+\tadAxioma{posContiguas(pos,g)}{ posValidasCont(Ag((pos.x+1,pos.y), \\Ag((pos.x-1,pos.y), Ag((pos.x,pos.y+1), Ag((pos.x,pos.y 1), $\emptyset$),g)}
 \tadAxioma{posValidasCont(conj,g)}{
     \IF $\emptyset$?(conj) THEN $\emptyset$
     ELSE{
@@ -327,6 +333,9 @@
 }
 
 \tadAxioma{hayEstudiantesAtrapados?(pos,c)}{ $\emptyset$?(eAtrapados(posContiguas(pos, grilla(c)), c))}
+
+\tadAlinearAxiomas{esAtrapadoE?(posE,conjcont,c)}
+
 \tadAxioma{eAtrapados(conjContiguo,c)}{ 
     \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
     ELSE{
@@ -381,6 +390,9 @@
     }
     FI
 }
+
+\tadAlinearAxiomas{placaDelAs(pos,conjplacas,dic)}
+
 \tadAxioma{placaDelAs(pos,conjplacas,dic)}{
     \IF Obtener(dameUno(conjplacas),dic).posicion $=$ pos THEN dameUno(conjplacas)
     ELSE placaDelAs(pos,sinUno(conjplacas),dic)
@@ -427,6 +439,8 @@
     ELSE definir(dameUno(conjAs),\\ (Obtener(dameUno(conjAs),agentes(c)).posicion,\\ Obtener(dameUno(conjAs),agentes(c)).capturas,\\  Obtener(dameUno(conjAs),agentes(c)).sanciones +1),\\ sancionarAs(sinUno(conjAs),c))
     FI
 }
+
+\tadAlinearAxiomas{asSancPrem(conjPrem,conjSanc,c)}
 %false-> premia / true -> sanciona
 \tadAxioma{premiarYSancionar(conjP,c)}{ \IF $\emptyset$?(conjP) THEN agentes(c)
     ELSE{
@@ -472,13 +486,15 @@
 }
 \tadAxioma{posAS(c, p)}{Obtener(p,agentes(c)).poscion}
 
+\tadAlinearAxiomas{posQueAcercanAUno(c,pos,objetivos)}
+
 \tadAxioma{posQueAcercan(c, pos, objetivos)}{
     \IF $\emptyset$?(objetivos) THEN $\emptyset$
     ELSE Ag(posQueAcercanAUno(c, pos, dameUno(objetivos)), \\posQueAcercan(pos, sinUno(objetivos)))
     FI
 }
 \tadAxioma{posQueAcercanAUno(c, pos, objetivo)}{
-    iterarDirs(objetivo, posContiguas(pos, grilla(c)), distTaxi(pos, objetivo))
+    iterarDirs(objetivo, posContiguas(pos, grilla(c)), \\distTaxi(pos, objetivo))
 }
 \tadAxioma{iterarDirs(objetivo, contiguas, dist)}{
     \IF $\emptyset$?(contiguas) THEN $\emptyset$
@@ -526,6 +542,9 @@
 }
 
 \tadAxioma{seConvierteEnHippie?(c, pos)}{cantHippiesAdyacentes(c, pos) $\geq$ 2}
+
+\tadAlinearAxiomas{buscarConvertidos(c, contiguas)}
+
 \tadAxioma{cantHippiesAdyacentes(c, pos)}{contarHippies(c, posContiguas(pos, grilla(c)))}
 \tadAxioma{contarHippies(c, contiguas)}{
     \IF $\emptyset$?(contiguas) THEN 0
@@ -584,13 +603,13 @@
 
 \tadAxioma{cantidadDeEstudiantes(c)}{ $\#$ estudiantes(c)}
 
+\tadAlinearAxiomas{losMasVigilantes(agentes, numCapturas)}
 \tadAxioma{asMasVigilante(c)}{elDeMenorPlaca(losMasVigilantes(agentes(c), \\numCapturasMax(conjuntoDeCapturas(agentes(c)))))}
 \tadAxioma{elDeMenorPlaca(placas)}{\IF $\#$placas $= 1$
-	THEN dameUno(placas)
-	ELSE min(dameUno(placas), elDeMenorPlaca(sinUno(placas)))
-	FI
+    THEN dameUno(placas)
+    ELSE min(dameUno(placas), elDeMenorPlaca(sinUno(placas)))
+    FI
 }
-\tadAlinearAxiomas{losMasVigilantes(agentes, numCapturas)}
 \tadAxioma{losMasVigilantes(agentes, numCapturas)}{ \IF $\#$claves(agentes) $= 1$
     THEN dameUno(claves(agentes))
     ELSE{
