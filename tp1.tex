@@ -41,7 +41,7 @@
 \cfoot{\thepage /\pageref{LastPage}}
 \renewcommand{\footrulewidth}{0.4pt}
 
-\author{Grupo MISSINGNO - Algoritmos y Estructuras de Datos II}
+\author{Grupo 1 - Algoritmos y Estructuras de Datos II}
 \date{2do cuatrimestre 2015}
 \title{Trabajo Practico 1}
 
@@ -62,8 +62,6 @@
 \section{TADs Auxiliares}
 \par \textbf{TAD} as \textbf{ES} tupla(posicion $pos$, nat $capturas$, nat $sanciones$)
 \par \textbf{TAD} posicion \textbf{ES} tupla(nat $x$, nat $y$)
-\par \textbf{TAD} movimiento \textbf{ES} tupla(posicion $pos$, direccion $dir$)
-\par \textbf{TAD} direccion \textbf{ES} enum\{arriba, abajo, izquierda, derecha\}
 \par \textbf{TAD} placa \textbf{ES} nat
 
 %TADS
@@ -73,7 +71,7 @@
 
 \tadGeneros{campus}
 
-\tadExporta{campus, generadores, observadores basicos}
+\tadExporta{campus, generadores, observadores basicos, cantidadDeHippies, cantidadDeEstudiantes, asMasVigilante}
 
 \tadIgualdadObservacional{c1}{c2}{campus}{$(grilla(c1) \igobs grilla(c2))\ \land$\\ $(agentes(c1) \igobs agentes(c2))\ \land$\\ $(estudiantes(c1) \igobs estudiantes(c2)) \ \land$\\ $(hippies(c1) \igobs hippies(c2))$}
 
@@ -103,13 +101,15 @@
 
 \tadOperacion{asValidos?}{grilla, dicc(placa, as)}{bool}{}
 \tadOperacion{iterarClaves}{grilla, dicc(placa, as), conj(placa)}{bool}{}
+\tadOperacion{asValido?}{grilla, as}{bool}{}
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
 \tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
-\tadOperacion{posNoRepetida?}{ass, conj(placa), posicion}{bool}{}
+\tadOperacion{posNoRepetida?}{diccAs, conj(placa), posicion}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
 
 \tadAlinearFunciones{hayEstudiantesAtrapados?}{posicion,conj(placa),dicc(placa,as)}{}
+%\tadAlinearFunciones{posSinAS?}{campus, posicion}{}
 
 \tadOperacion{posSinAS?}{campus, posicion}{bool}{}
 \tadOperacion{conjuntoPosAs}{conj(placa),dicc(placa,as)}{conj(posicion)}{}
@@ -140,7 +140,7 @@
 
 \tadOperacion{sancionarAs}{multiconj(placa),campus}{dicc(placa,as)}{}
 \tadOperacion{premiarYSancionar}{multiconj((placa,bool)),campus}{dicc(placa,as)}{}
-\tadOperacion{asSancPrem}{multiconj(posicion),multiconj(posicion),campus}{conj((placa,bool))}{}
+\tadOperacion{asSancPrem}{multiconj(posicion),multiconj(posicion),campus}{multiconj((placa,bool))}{}
 \tadOperacion{hayHippies?}{campus}{bool}{}
 
 \tadOperacion{movEntradaCercana}{campus, placa}{dicc(placa,as)}{}
@@ -149,7 +149,7 @@
 \tadOperacion{posAS}{campus, placa}{posicion}{}
 \tadOperacion{posQueAcercan}{campus, posicion, conj(posicion)}{conj(posicion)}{}
 \tadOperacion{posQueAcercanAUno}{campus, posicion, posicion}{conj(posicion)}{}
-\tadOperacion{iterarDirecciones}{posicion, conj(posicion)}{conj(posicion)}{}
+\tadOperacion{iterarDirs}{posicion, conj(posicion), nat}{conj(posicion)}{}
 
 \tadOperacion{distTaxi}{posicion,posicion}{nat}{}
 \tadOperacion{distancia}{nat,nat}{nat}{}
@@ -158,12 +158,12 @@
 
 \tadOperacion{movYActualizarAS}{placa,posicion,campus}{dicc(placa,as)}{}
 
-\tadOperacion{perseguirHippies}{placa,campus}{dic(placa,as)}{}
+\tadOperacion{perseguirHippies}{placa,campus}{dicc(placa,as)}{}
 \tadOperacion{personasCercanas}{posicion,conj(posicion)}{conj(posicion)}{}
 \tadOperacion{menorDistanciaAPos}{posicion,con(posicion)}{nat}{}
 
 \tadOperacion{seConvierteEnHippie?}{campus, posicion}{bool}{}
-\tadOperacion{cantHippiesAdyacentes}{campus, posicion}{bool}{}
+\tadOperacion{cantHippiesAdyacentes}{campus, posicion}{nat}{}
 \tadOperacion{contarHippies}{campus, conj(posicion)}{nat}{}
 
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
@@ -195,215 +195,216 @@
 
 
 % Axiomas
-\tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{p}, \paratodo{direccion}{dir}, \paratodo{dicc(placa,as)}{ass}, \paratodo{placa}{id}]
+\tadAxiomas[\paratodo{campus}{c}, \paratodo{grilla}{g}, \paratodo{posicion}{pos1, pos2, pos}, \paratodo{conj(posicion)}{conjPos, contiguas}, \paratodo{dicc(placa,as)}{diccAs}, \paratodo{placa}{id}, \paratodo{conj(placa)}{claves, placas}] %faltan agregar varias todavia
 
-\tadAlinearAxiomas{agentes(movEstudiante(c, posE, dir))}
+\tadAlinearAxiomas{agentes(movEstudiante(c, posE, fin))}
 
-\tadAxioma{asValidos?(g, ass)}{iterarClaves(g, ass, claves(ass))}
-\tadAxioma{iterarClaves(g, ass, claves)}{
+\tadAxioma{asValidos?(g, diccAs)}{iterarClaves(g, diccAs, claves(diccAs))}
+\tadAxioma{iterarClaves(g, diccAs, claves)}{
     \IF $\emptyset$?(claves) THEN true
     ELSE { 
-    \-\- \IF asValido?(g, obtener(ass, dameUno(claves))) $\land$ \\ posNoRepetida?(ass, claves, posicion(dameUno(claves))) THEN iterarClaves(g, ass, sinUno(claves))
+    \-\- \IF asValido?(g, obtener(diccAs, dameUno(claves))) $\land$ \\ posNoRepetida?(diccAs, claves, posicion(dameUno(claves))) THEN iterarClaves(g, diccAs, sinUno(claves))
     \-\- ELSE false
     \-\- FI
     }
     FI 
 }
-\tadAxioma{asValido?(g, as)}{posValida?(g, posicion(as)) $\land$ posicion(as) $\notin$ obstaculos(g) $\land$ \\sinCapturas?(as) $\land$ sinSanciones?(as)}
-\tadAxioma{posValida?(g, pos)}{(x(pos) $<$ ancho(g)) $\land$ (y(pos) $<$ alto(g))}
-\tadAxioma{sinCapturas?(as)}{capturas(as) = 0}
-\tadAxioma{sinSanciones?(as)}{sanciones(as) = 0}
-\tadAxioma{posNoRepetida?(ass, claves, pos)}{
+\tadAxioma{asValido?(g, agente)}{posValida?(g, posicion(agente)) $\land$ posicion(agente) $\notin$ obstaculos(g) $\land$ \\sinCapturas?(agente) $\land$ sinSanciones?(agente)}
+\tadAxioma{posValida?(g, pos1)}{(x(pos1) $<$ ancho(g)) $\land$ (y(pos1) $<$ alto(g))}
+\tadAxioma{sinCapturas?(agente)}{capturas(agente) = 0}
+\tadAxioma{sinSanciones?(agente)}{sanciones(agente) = 0}
+\tadAxioma{posNoRepetida?(diccAs, claves, pos1)}{
     \IF $\emptyset$?(claves) THEN true
-    ELSE posicion(obtener(ass, dameUno(claves))) = pos $\land$ \\posNoRepetida?(ass, sinUno(claves), pos)
+    ELSE posicion(obtener(diccAs, dameUno(claves))) = pos1 $\land$ \\posNoRepetida?(diccAs, sinUno(claves), pos1)
     FI
 }
-\tadAxioma{posVacia?(c, pos)}{pos $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos) $\land$\\ $\neg$esHippie?(c, pos) $\land$ $\neg$esEstudiante?(c, pos)}
-\tadAxioma{posSinAS?(c, pos)}{ pos $\notin$ conjuntoPosAs(claves(agentes(c),agentes(c)))}
-\tadAxioma{conjuntoPosAs(conjclaves,dic)}{
-    \IF $\emptyset$?(conjclaves) THEN $\emptyset$
-    ELSE Ag(Obtener(dameUno(conjclaves),dic).posicion,\\ conjuntoPosAs(sinUno(conjclaves),dic)
+\tadAxioma{posVacia?(c, pos1)}{pos1 $\notin$ obstaculos(grilla(c)) $\land$ posSinAS?(c, pos1) $\land$\\ $\neg$esHippie?(c, pos1) $\land$ $\neg$esEstudiante?(c, pos1)}
+\tadAxioma{posSinAS?(c, pos1)}{ pos1 $\notin$ conjuntoPosAs(claves(agentes(c),agentes(c)))}
+\tadAxioma{conjuntoPosAs(claves, diccAs)}{
+    \IF $\emptyset$?(claves) THEN $\emptyset$
+    ELSE Ag(Obtener(dameUno(claves), diccAs).posicion,\\ conjuntoPosAs(sinUno(claves),diccAs)
     FI
 }
-\tadAxioma{esHippie?(c, pos)}{ pos $\in$ hippies(c)}
-\tadAxioma{esEstudiante?(c, pos)}{ pos $\in$ estudiantes(c)}
-\tadAxioma{esEntrada?(c,pos)}{ pos.y = 0 $\lor$ pos.y = alto(grilla(c)) - 1 }
+\tadAxioma{esHippie?(c, pos1)}{ pos1 $\in$ hippies(c)}
+\tadAxioma{esEstudiante?(c, pos1)}{ pos1 $\in$ estudiantes(c)}
+\tadAxioma{esEntrada?(c,pos1)}{ pos1.y = 0 $\lor$ pos1.y = alto(grilla(c)) - 1 }
 \tadAxioma{adyacentes?(pos1, pos2)}{ 
     (pos1.y = pos2.y + 1 $\land$ pos1.x = pos2.x) $\lor$ \\
     (pos2.y = pos1.y + 1 $\land$ pos1.x = pos2.x) $\lor$ \\    
     (pos1.x = pos2.x + 1 $\land$ pos1.y = pos2.y) $\lor$ \\    
     (pos2.x = pos1.x + 1 $\land$ pos1.y = pos2.y)        
 }
-\tadAxioma{esAS?(c, p)}{ def?(p,agentes(c))}
+\tadAxioma{esAS?(c, pos1)}{ def?(pos1,agentes(c))}
 
-\tadAxioma{grilla(crearCampus(g, ass))}{g}
-\tadAxioma{grilla(entraEstudiante(c, p))}{grilla(c)}
-\tadAxioma{grilla(entraHippie(c, p))}{grilla(c)}
-\tadAxioma{grilla(saleEstudiante(c, p))}{grilla(c)}
-\tadAxioma{grilla(movEstudiante(c, p, dir))}{grilla(c)}
-\tadAxioma{grilla(movHippie(c, p))}{grilla(c)}
+\tadAxioma{grilla(crearCampus(g, diccAs))}{g}
+\tadAxioma{grilla(entraEstudiante(c, pos1))}{grilla(c)}
+\tadAxioma{grilla(entraHippie(c, pos1))}{grilla(c)}
+\tadAxioma{grilla(saleEstudiante(c, pos1))}{grilla(c)}
+\tadAxioma{grilla(movEstudiante(c, pos1, pos2))}{grilla(c)}
+\tadAxioma{grilla(movHippie(c, pos1))}{grilla(c)}
 \tadAxioma{grilla(movAS(c, id))}{grilla(c)}
 
-\tadAxioma{agentes(crearCampus(g, ass))}{ass}
-\tadAxioma{agentes(entraEstudiante(c, posE))}{actualizarAs(posE,agentes(c),c)}
-\tadAxioma{agentes(entraHippie(c, posH))}{actualizarAs(posH,agentes(c),c)}
-\tadAxioma{agentes(saleEstudiante(c, posE))}{agentes(c)}
-\tadAxioma{agentes(movEstudiante(c, posE, dir))}{actualizarAs(posE,agentes(c),c)}
-\tadAxioma{agentes(movHippie(c, posH))}{actualizarAs(posH,agentes(c),c)}
+\tadAxioma{agentes(crearCampus(g, diccAs))}{diccAs}
+\tadAxioma{agentes(entraEstudiante(c, pos1))}{actualizarAs(pos1,agentes(c),c)}
+\tadAxioma{agentes(entraHippie(c, pos1))}{actualizarAs(pos1,agentes(c),c)}
+\tadAxioma{agentes(saleEstudiante(c, pos1))}{agentes(c)}
+\tadAxioma{agentes(movEstudiante(c, pos1, pos2))}{actualizarAs(pos1,agentes(c),c)}
+\tadAxioma{agentes(movHippie(c, pos1))}{actualizarAs(pos1,agentes(c),c)}
 
-\tadAlinearAxiomas{estudiantes(movEstudiante(c, ini, fin))}
+\tadAlinearAxiomas{estudiantes(movEstudiante(c, pos1, pos2))}
 
-\tadAxioma{agentes(movAS(c, p))}{ \IF obtener(p,agentes(c)).sanciones $\geq3$ 
+\tadAxioma{agentes(movAS(c, id))}{ \IF obtener(id,agentes(c)).sanciones $\geq3$ 
     THEN agentes(c)
     ELSE {
-        \- \IF $\neg$hayHippies?(c) THEN movEntradaCercana(c, p)
-        ELSE perseguirHippies(p,c)
+        \- \IF $\neg$hayHippies?(c) THEN movEntradaCercana(c, id)
+        ELSE perseguirHippies(id,c)
         FI
     }
     FI
 }
 
-\tadAxioma{estudiantes(crearCampus(g, ass))}{$\emptyset$}
-\tadAxioma{estudiantes(entraEstudiante(c, pos))}{
-    \IF seConvierteEnHippie?(c, pos) THEN estudiantes(c)
-    ELSE Ag(pos, estudiantes(c)
+\tadAxioma{estudiantes(crearCampus(g, diccAs))}{$\emptyset$}
+\tadAxioma{estudiantes(entraEstudiante(c, pos1))}{
+    \IF seConvierteEnHippie?(c, pos1) THEN estudiantes(c)
+    ELSE Ag(pos1, estudiantes(c)
     FI
 }
-\tadAxioma{estudiantes(entraHippie(c, pos))}{estudiantes(c) - estudiantesFalopeados(c, pos)}
-\tadAxioma{estudiantes(saleEstudiante(c, pos))}{estudiantes(c) - \{pos\}}
-\tadAxioma{estudiantes(movEstudiante(c, ini, fin))}{
-    \IF seConvierteEnHippie?(c, fin) THEN estudiantes(c) - \{ini\} 
-    ELSE Ag(fin, estudiantes(c) - \{ini\}) 
+\tadAxioma{estudiantes(entraHippie(c, pos1))}{estudiantes(c) - estudiantesFalopeados(c, pos1)}
+\tadAxioma{estudiantes(saleEstudiante(c, pos1))}{estudiantes(c) - \{pos1\}}
+\tadAxioma{estudiantes(movEstudiante(c, pos1, pos2))}{
+    \IF seConvierteEnHippie?(c, pos1) THEN estudiantes(c) - \{pos1\} 
+    ELSE Ag(pos2, estudiantes(c) - \{pos1\}) 
     FI
 }
-\tadAxioma{estudiantes(movHippie(c, pos))}{
+\tadAxioma{estudiantes(movHippie(c, pos1))}{
     % saber a donde se mueve el hippie
     % preguntar a quien convierte en hippies en esa nueva posicion y restarlos de estudiantes(c)
     % preguntar a quien acorrala el hippie ceva pos y restarlos tambien
-    estudiantes(c) - estudiantesFalopeados(c, nuevaPosHippie(c, pos)) 
+    estudiantes(c) - estudiantesFalopeados(c, nuevaPosHippie(c, pos1)) 
 }
 \tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c)}
 
-\tadAxioma{hippies(crearCampus(g, ass))}{$\emptyset$}
-\tadAxioma{hippies(entraEstudiante(c, pos))}{hippies(c) - hippiesConvertidos(c, pos) - hippiesCapturados(c, pos)}
-\tadAxioma{hippies(entraHippie(c, pos))}{
-    \IF capturadoH?(c, pos) THEN hippies(c) - hippiesCapturados(c, pos)
-    ELSE Ag(pos, hippies(c) - hippiesCapturados(c, pos)) 
+\tadAxioma{hippies(crearCampus(g, diccAs))}{$\emptyset$}
+\tadAxioma{hippies(entraEstudiante(c, pos1))}{hippies(c) - hippiesConvertidos(c, pos1) - hippiesCapturados(c, pos1)}
+\tadAxioma{hippies(entraHippie(c, pos1))}{
+    \IF capturadoH?(c, pos1) THEN hippies(c) - hippiesCapturados(c, pos1)
+    ELSE Ag(pos1, hippies(c) - hippiesCapturados(c, pos1)) 
     FI
 }
-\tadAxioma{hippies(saleEstudiante(c, pos))}{hippies(c)}
-\tadAxioma{hippies(movEstudiante(c, ini, fin))}{
-    \IF seConvierteEnHippie?(c, fin) THEN Ag(fin, hippies(c) - hippiesCapturados(c, fin))
-    ELSE hippies(c) - hippiesCapturados(c, fin)
+\tadAxioma{hippies(saleEstudiante(c, pos1))}{hippies(c)}
+\tadAxioma{hippies(movEstudiante(c, pos1, pos2))}{
+    \IF seConvierteEnHippie?(c, pos2) THEN Ag(pos2, hippies(c) - hippiesCapturados(c, pos2))
+    ELSE hippies(c) - hippiesCapturados(c, pos2)
     FI
 }
-\tadAxioma{hippies(movHippie(c, pos))}{hippies(c) - hippiesCapturados(c, nuevaPosHippie(c, pos))}
+\tadAxioma{hippies(movHippie(c, pos1))}{hippies(c) - hippiesCapturados(c, nuevaPosHippie(c, pos1))}
 \tadAxioma{hippies(movAS(c, id))}{hippies(c) - hipiesCapturados(c, nuevaPosAS(c, id))}
 
-\tadAxioma{actualizarAs(pos,dic,c)}{
-    \IF $\neg$hayHippiesAtrapados(pos,c) $\land \neg$hayEstudiantesAtrapados?(pos,c) THEN dic
+\tadAxioma{actualizarAs(pos1,diccAs,c)}{
+    \IF $\neg$hayHippiesAtrapados(pos1,c) $\land \neg$hayEstudiantesAtrapados?(pos1,c) THEN diccAs
     ELSE {
-        \IF hayHippiesAtrapados(pos,c) $\land \neg$hayEstudiantesAtrapados?(pos,c) 
-        THEN premiarAs(asParaModificar(periferia(hAtrapados(\\ posContiguas(pos ,grilla(c)), c), c), c), c)
+        \IF hayHippiesAtrapados(pos1,c) $\land \neg$hayEstudiantesAtrapados?(pos1,c) 
+        THEN premiarAs(asParaModificar(periferia(hAtrapados(\\ posContiguas(pos1 ,grilla(c)), c), c), c), c)
         ELSE{
-            \IF $\neg$hayHippiesAtrapados(pos,c)$\land$hayEstudiantesAtrapados?(pos,c) THEN sancionarAs(asParaModificar(periferia\\ (eAtrapados(posContiguas(pos ,grilla(c)), c), c), c), c)
-            ELSE premiarYSancionarAs(asParaModificar(periferia\\ (hAtrapados(posContiguas(pos, grilla(c)), c), c), c),\\  asSancPrem(asParaModificar(periferia\\ (eAtrapados(posContiguas(pos ,grilla(c)), c), c), c), c), c)
+            \IF $\neg$hayHippiesAtrapados(pos1,c)$\land$hayEstudiantesAtrapados?(pos1,c) THEN sancionarAs(asParaModificar(periferia\\ (eAtrapados(posContiguas(pos1 ,grilla(c)), c), c), c), c)
+            ELSE premiarYSancionarAs(asSancPrem(\\ asParaModificar(periferia(hAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c),\\ asParaModificar(periferia(eAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c)), c)
+
             FI
         }
         FI
     }
     FI
 }
-\tadAxioma{hayHippiesAtrapados(pos,c)}{ $\emptyset$?(hAtrapados(posContiguas(pos, grilla(c)), c))}
-\tadAxioma{posContiguas(pos,g)}{ posValidasCont(Ag((pos.x+1,pos.y), Ag((pos.x-1,pos.y), Ag((pos.x,pos.y+1), Ag((pos.x,pos.y 1), $\emptyset$),g)}
-\tadAxioma{posValidasCont(conj,g)}{
-    \IF $\emptyset$?(conj) THEN $\emptyset$
+\tadAxioma{hayHippiesAtrapados(pos1,c)}{ $\emptyset$?(hAtrapados(posContiguas(pos1, grilla(c)), c))}
+\tadAxioma{posContiguas(pos1,g)}{ posValidasCont(Ag((pos1.x+1,pos1.y), Ag((pos1.x-1,pos1.y), Ag((pos1.x,pos1.y+1), Ag((pos1.x,pos1.y 1), $\emptyset$))))),g)}
+\tadAxioma{posValidasCont(conjPos,g)}{
+    \IF $\emptyset$?(conjPos) THEN $\emptyset$
     ELSE{
-        \IF posValida?(g,dameUno(conj)) THEN Ag(dameUno(conj),posValidasCont(g,sinUno(conj)))
-        ELSE posValidasCont(g,sinUno(conj))
+        \IF posValida?(g,dameUno(conjPos)) THEN Ag(dameUno(conjPos),posValidasCont(g,sinUno(conjPos)))
+        ELSE posValidasCont(g,sinUno(conjPos))
         FI
     }
     FI
 }
 
-\tadAxioma{hayEstudiantesAtrapados?(pos,c)}{ $\emptyset$?(eAtrapados(posContiguas(pos, grilla(c)), c))}
-\tadAxioma{eAtrapados(conjContiguo,c)}{ 
-    \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
+\tadAxioma{hayEstudiantesAtrapados?(pos1,c)}{ $\emptyset$?(eAtrapados(posContiguas(pos1, grilla(c)), c))}
+\tadAxioma{eAtrapados(conjPos,c)}{ 
+    \IF $\emptyset$?(conjPos) THEN $\emptyset$
     ELSE{
-        \IF dameUno(conjContiguo) $\in$ estudiantes(c)
+        \IF dameUno(conjPos) $\in$ estudiantes(c)
         THEN{
-            \IF esAtrapadoE?(dameUno(conjContiguo),\\ posContiguas(dameUno(conjContiguo),grilla(c)))
-            THEN Ag(dameUno(conjContiguo),\\ eAtrapados(sinUno(conContiguo),c))
-            ELSE eAtrapados(sinUno(conjContiguo),c)
+            \IF esAtrapadoE?(dameUno(conjPos),\\ posContiguas(dameUno(conjPos),grilla(c)))
+            THEN Ag(dameUno(conjPos),\\ eAtrapados(sinUno(conjPos),c))
+            ELSE eAtrapados(sinUno(conjPos),c)
             FI
         }
-        ELSE eAtrapados(sinUno(conjContiguo),c)
+        ELSE eAtrapados(sinUno(conjPos),c)
         FI
     }
     FI
 }
-\tadAxioma{esAtrapadoE?(posE,conjcont,c)}{
-    \IF $\emptyset$?(conjcont) THEN false
+\tadAxioma{esAtrapadoE?(pos1,conjPos,c)}{
+    \IF $\emptyset$?(conjPos) THEN false
     ELSE{
-        \IF hayPosVacia?(conjcont,c) $\lor$ estaEnEntrada(posE,grilla(c)) THEN false
+        \IF hayPosVacia?(conjPos,c) $\lor$ estaEnEntrada(pos1,grilla(c)) THEN false
         ELSE {
-            \IF dameUno(conjcont) $\in$\\ conjuntoPosAs(claves(agentes(c),agentes(c)) THEN true
-            ELSE esAtrapadoE?(posE,sinUno(conjcont),c)
+            \IF dameUno(conjPos) $\in$\\ conjuntoPosAs(claves(agentes(c),agentes(c)) THEN true
+            ELSE esAtrapadoE?(pos1,sinUno(conjPos),c)
             FI  
         }
         FI
     }
     FI
 }
-\tadAxioma{hayPosVacia?(conjpos,c)}{
-    \IF $\emptyset$?(conjpos) THEN false
+\tadAxioma{hayPosVacia?(conjPos,c)}{
+    \IF $\emptyset$?(conjPos) THEN false
     ELSE{
-        \IF posVacia?(dameUno(conjpos)) THEN true
+        \IF posVacia?(dameUno(conjPos)) THEN true
         ELSE hayPosVacia?(conjpos,c)
         FI  
     }
     FI
 }
-\tadAxioma{estaEnEntrada?(posE,g)}{ posE.y = 0 $\lor$ posE.y = altura(g) - 1}
+\tadAxioma{estaEnEntrada?(pos1,g)}{ pos1.y = 0 $\lor$ pos1.y = altura(g) - 1}
 
-\tadAxioma{premiarAs(conjAs,c)}{
-    \IF $\emptyset$?(conjAs) THEN agentes(c)
-    ELSE definir(dameUno(conjAs),\\ (Obtener(dameUno(conjAs),agentes(c)).posicion,\\ Obtener(dameUno(conjAs),agentes(c)).capturas +1,\\ Obtener(dameUno(conjAs),agentes(c)).sanciones),\\ premiarAs(sinUno(conjAs),c))
+\tadAxioma{premiarAs(placas,c)}{
+    \IF $\emptyset$?(placas) THEN agentes(c)
+    ELSE definir(dameUno(placas),\\ (Obtener(dameUno(placas),agentes(c)).posicion,\\ Obtener(dameUno(placas),agentes(c)).capturas +1,\\ Obtener(dameUno(placas),agentes(c)).sanciones),\\ premiarAs(sinUno(placas),c))
     FI
 }
-\tadAxioma{asParaModificar(conjtodo,c)}{
-    \IF $\emptyset$?(conjAs) THEN $\emptyset$
+\tadAxioma{asParaModificar(MCpos1,c)}{
+    \IF $\emptyset$?(MCpos1) THEN $\emptyset$
     ELSE{
-        \IF dameUno(conjtodo) $\in$\\ conjuntoPosAs(claves(agentes(c),agentes(c))
-        THEN Ag(placaDelAs(dameUno(conjtodo),claves(agentes(c),agentes(c)),\\ asParaModificar(sinUno(conjtodo),c))
-        ELSE asParaModificar(sinUno(conjtodo),c)
+        \IF dameUno(MCpos1) $\in$\\ conjuntoPosAs(claves(agentes(c),agentes(c))
+        THEN Ag(placaDelAs(dameUno(MCpos1),claves(agentes(c),agentes(c)),\\ asParaModificar(sinUno(MCpos1),c))
+        ELSE asParaModificar(sinUno(MCpos1),c)
         FI
     }
     FI
 }
-\tadAxioma{placaDelAs(pos,conjplacas,dic)}{
-    \IF Obtener(dameUno(conjplacas),dic).posicion $=$ pos THEN dameUno(conjplacas)
-    ELSE placaDelAs(pos,sinUno(conjplacas),dic)
+\tadAxioma{placaDelAs(pos1,claves,diccAs)}{
+    \IF Obtener(dameUno(claves),diccAs).posicion $=$ pos1 THEN dameUno(claves)
+    ELSE placaDelAs(pos1,sinUno(claves),diccAs)
     FI
 }
-\tadAxioma{periferia(conj,c)}{
-    \IF $\emptyset$?(conjAs) THEN $\emptyset$
-    ELSE posContigua(dameUno(conj),grilla(c))\\ $\cup$ periferia(sinUno(conj),c)
+\tadAxioma{periferia(conjPos,c)}{
+    \IF $\emptyset$?(conjPos) THEN $\emptyset$
+    ELSE posContiguas(dameUno(conjPos),grilla(c))\\ $\cup$ periferia(sinUno(conjPos),c)
     FI
 }
 
 
 
-\tadAxioma{hAtrapados(conjContiguo,c)}{ \IF $\emptyset$?(conjContiguo) THEN $\emptyset$
+\tadAxioma{hAtrapados(conjPos,c)}{ \IF $\emptyset$?(conjPos) THEN $\emptyset$
     ELSE{
-        \IF dameUno(conjContiguo)$\in$hippies(c)
+        \IF dameUno(conjPos)$\in$hippies(c)
         THEN{
-            \IF esAtrapadoH?(posContiguas(dameUno(conjContiguo),grilla(c)))
-            THEN Ag(dameUno(conjContiguo),\\ hAtrapados(sinUno(conContiguo),c))
-            ELSE hAtrapados(sinUno(conjContiguo),c)
+            \IF esAtrapadoH?(posContiguas(dameUno(conjPos),grilla(c)))
+            THEN Ag(dameUno(conjPos),\\ hAtrapados(sinUno(conjPos),c))
+            ELSE hAtrapados(sinUno(conjPos),c)
             FI
         }
-        ELSE hAtrapados(sinUno(conjContiguo),c)
+        ELSE hAtrapados(sinUno(conjPos),c)
         FI
     }
     FI
@@ -437,16 +438,16 @@
     }
     FI
 }
-\tadAxioma{asSancPrem(conjPrem,conjSanc,c)}{
-    \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$
-    ELSE{
-        \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 
-        THEN Ag(\\ (placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),conjSanc,c))
-        ELSE{
-            \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)
-            THEN Ag(\\ (placaDelAs(dameUno(conjSanc),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(conjPrem,sinUno(conjSanc),c))
-            ELSE{
-                    Ag((placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false), Ag((placaDelAs(dameUno(conjSanc),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc),c)))
++\tadAxioma{asSancPrem(conjPrem,conjSanc)}{
+     \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$		     \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$
+     ELSE{		     ELSE{
+         \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 		         \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 
+-        THEN Ag(\\ (placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),conjSanc,c))		+        THEN Ag(\\ (dameUno(conjPrem),false), asSancPrem(sinUno(conjPrem),conjSanc))
+         ELSE{		         ELSE{
+             \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)		             \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)
+-            THEN Ag(\\ (placaDelAs(dameUno(conjSanc),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(conjPrem,sinUno(conjSanc),c))		+            THEN Ag(\\ (dameUno(conjSanc),true),\\ asSancPrem(conjPrem,sinUno(conjSanc)))
+             ELSE{		             ELSE{
+-                    Ag((placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false), Ag((placaDelAs(dameUno(conjSanc),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc),c)))		+                    Ag((dameUno(conjPrem),false), Ag((dameUno(conjSanc), true),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc))))
             }
             FI
         }
@@ -458,7 +459,7 @@
 \tadAxioma{movEntradaCercana(c, p)}{
     \IF nuevaPosicion(posAS(c, p), posQueAcercan(c,posAS(c,p),\\ entradasCercanas(posAS(c, p),grilla(c)))= posAS(c, p)
     THEN agentes(c)
-    ELSE movYActualizar(p,nuevaPosicion(posAS(c, p),\\ posQueAcercan(c,posAS(c,p),entradasCercanas(posAS(c,p), grilla(c))),c)
+    ELSE movYActualizarAS(p,nuevaPosicion(posAS(c, p),\\ posQueAcercan(c,posAS(c,p),entradasCercanas(posAS(c,p), grilla(c))),c)
     FI
 }
 \tadAxioma{nuevaPosicion(posactual,conjpos,c)}{
@@ -489,10 +490,10 @@
     } 
     FI
 }
-\tadAxioma{distTaxi(pos,posPers)}{ distancia(pos.x, posPers.x) + distancia(pos.y, posPers.y)}
+\tadAxioma{distTaxi(pos1,pos2)}{ distancia(pos1.x, pos2.x) + distancia(pos1.y, pos2.y)}
 \tadAxioma{distancia(n,m)}{\IF $m-n < 0$ THEN $-(m-n)$ ELSE $m-n$ FI}
 
-\tadAxioma{entradasCercanas}{ \IF distancia(pos.y, alto(g)-1) $<$ distancia(pos.y, 0) 
+\tadAxioma{entradasCercanas(pos, g)}{ \IF distancia(pos.y, alto(g)-1) $<$ distancia(pos.y, 0) 
     THEN Ag((pos.x, alto(g)-1) $\emptyset$)
     ELSE {
         \IF distancia(pos.y, 0) $<$ distancia(pos, alto(g)-1)
@@ -512,16 +513,16 @@
     ELSE movYActualizarAS(p,\\ nuevaPosicion(posAS(c,p), posQueAcercan(c, posAS(c,p),\\ personasCercanas(posAS(c,p), hippies(c)),c)
     FI
 }
-\tadAxioma{personasCercanas(pos,conj)}{ \IF $\emptyset$?(conj) THEN $\emptyset$
+\tadAxioma{personasCercanas(pos,conjPos)}{ \IF $\emptyset$?(conj) THEN $\emptyset$
     ELSE{
-        \IF distTaxi(pos,dameUno(conj)) =\\ menorDistanciaAPos(pos,conj) THEN Ag(dameUno(conjH),personasCercanas(pos,sinUno(conj)))
-        ELSE personasCercanas(pos,sinUno(conj))
+        \IF distTaxi(pos,dameUno(conjPos)) =\\ menorDistanciaAPos(pos,conjPos) THEN Ag(dameUno(conjPos),personasCercanas(pos,sinUno(conjPos)))
+        ELSE personasCercanas(pos,sinUno(conjPos))
         FI
     }
     FI
 }
-\tadAxioma{menorDistanciaAPos(pos,conj)}{ \IF $\#$(conj) =1 THEN distTaxi(pos,dameUno(conj))
-    ELSE min(distTaxi(pos,dameUno(conj)),\\ menorDistanciaAPos(pos,conj))
+\tadAxioma{menorDistanciaAPos(pos,conjPos)}{ \IF $\#$(conjPos) =1 THEN distTaxi(pos,dameUno(conjPos))
+    ELSE min(distTaxi(pos,dameUno(conjPos)),\\ menorDistanciaAPos(pos,conjPos))
     FI
 }
 
