@@ -313,7 +313,7 @@
         THEN premiarAs(asParaModificar(periferia(hAtrapados(\\ posContiguas(pos ,grilla(c)), c), c), c), c)
         ELSE{
             \IF $\neg$hayHippiesAtrapados(pos,c)$\land$hayEstudiantesAtrapados?(pos,c) THEN sancionarAs(asParaModificar(periferia\\ (eAtrapados(posContiguas(pos ,grilla(c)), c), c), c), c)
-            ELSE premiarYSancionarAs(asSancPrem(\\ asParaModificar(periferia(hAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c),\\ asParaModificar(periferia(eAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c)), c)
+            ELSE premiarYSancionar(asSancPrem(\\ asParaModificar(periferia(hAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c),\\ asParaModificar(periferia(eAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c)), c)
             FI
         }
         FI
