@@ -75,7 +75,7 @@
 
 \tadIgualdadObservacional{c1}{c2}{campus}{$(grilla(c1) \igobs grilla(c2))\ \land$\\ $(agentes(c1) \igobs agentes(c2))\ \land$\\ $(estudiantes(c1) \igobs estudiantes(c2)) \ \land$\\ $(hippies(c1) \igobs hippies(c2))$}
 
-\tadAlinearFunciones{posNoRepetida?}{campus/c, posicion/p, direccion/dir}{}
+\tadAlinearFunciones{posNoRepetida?}{dicc(placa, as), conj(placa), posicion}{}
 
 % Generadores
 \tadGeneradores
@@ -105,7 +105,7 @@
 \tadOperacion{posValida?}{grilla, posicion}{bool}{}
 \tadOperacion{sinCapturas?}{dicc(placa, as)}{bool}{}
 \tadOperacion{sinSanciones?}{dicc(placa, as)}{bool}{}
-\tadOperacion{posNoRepetida?}{diccAs, conj(placa), posicion}{bool}{}
+\tadOperacion{posNoRepetida?}{dicc(placa, as), conj(placa), posicion}{bool}{}
 \tadOperacion{posVacia?}{campus, posicion}{bool}{}
 
 \tadAlinearFunciones{hayEstudiantesAtrapados?}{posicion,conj(placa),dicc(placa,as)}{}
@@ -163,7 +163,10 @@
 \tadOperacion{menorDistanciaAPos}{posicion,con(posicion)}{nat}{}
 
 \tadOperacion{seConvierteEnHippie?}{campus, posicion}{bool}{}
+
 \tadOperacion{cantHippiesAdyacentes}{campus, posicion}{nat}{}
+
+\tadAlinearFunciones{cantidadDeEstudiantes}{campus, conj(posicion)}{}
 \tadOperacion{contarHippies}{campus, conj(posicion)}{nat}{}
 
 \tadOperacion{estudiantesFalopeados}{campus, posicion}{conj(posicion)}{}
@@ -282,6 +285,9 @@
     % preguntar a quien acorrala el hippie ceva pos y restarlos tambien
     estudiantes(c) - estudiantesFalopeados(c, nuevaPosHippie(c, pos1)) 
 }
+
+\tadAlinearAxiomas{hippies(movEstudiante(c, pos1, pos2))}
+
 \tadAxioma{estudiantes(movAS(c, id))}{estudiantes(c)}
 
 \tadAxioma{hippies(crearCampus(g, diccAs))}{$\emptyset$}
@@ -302,12 +308,12 @@
 
 \tadAxioma{actualizarAs(pos1,diccAs,c)}{
     \IF $\neg$hayHippiesAtrapados(pos1,c) $\land \neg$hayEstudiantesAtrapados?(pos1,c) THEN diccAs
-    ELSE {
+    ELSE{
         \IF hayHippiesAtrapados(pos1,c) $\land \neg$hayEstudiantesAtrapados?(pos1,c) 
         THEN premiarAs(asParaModificar(periferia(hAtrapados(\\ posContiguas(pos1 ,grilla(c)), c), c), c), c)
-        ELSE{
+        ELSE AS   {
             \IF $\neg$hayHippiesAtrapados(pos1,c)$\land$hayEstudiantesAtrapados?(pos1,c) THEN sancionarAs(asParaModificar(periferia\\ (eAtrapados(posContiguas(pos1 ,grilla(c)), c), c), c), c)
-            ELSE premiarYSancionarAs(asSancPrem(\\ asParaModificar(periferia(hAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c),\\ asParaModificar(periferia(eAtrapados\\ (posContiguas(pos,grilla(c)),c),c),c)), c)
+            ELSE premiarYSancionarAs(asSancPrem(\\ asParaModificar(periferia(hAtrapados\\ (posContiguas(pos1,grilla(c)),c),c),c),\\ asParaModificar(periferia(eAtrapados\\ (posContiguas(pos1,grilla(c)),c),c),c)), c)
 
             FI
         }
@@ -315,6 +321,7 @@
     }
     FI
 }
+
 \tadAxioma{hayHippiesAtrapados(pos1,c)}{ $\emptyset$?(hAtrapados(posContiguas(pos1, grilla(c)), c))}
 \tadAxioma{posContiguas(pos1,g)}{ posValidasCont(Ag((pos1.x+1,pos1.y), Ag((pos1.x-1,pos1.y), Ag((pos1.x,pos1.y+1), Ag((pos1.x,pos1.y 1), $\emptyset$))))),g)}
 \tadAxioma{posValidasCont(conjPos,g)}{
@@ -326,6 +333,7 @@
     }
     FI
 }
+
 
 \tadAxioma{hayEstudiantesAtrapados?(pos1,c)}{ $\emptyset$?(eAtrapados(posContiguas(pos1, grilla(c)), c))}
 \tadAxioma{eAtrapados(conjPos,c)}{ 
@@ -382,6 +390,7 @@
     }
     FI
 }
+
 \tadAxioma{placaDelAs(pos1,claves,diccAs)}{
     \IF Obtener(dameUno(claves),diccAs).posicion $=$ pos1 THEN dameUno(claves)
     ELSE placaDelAs(pos1,sinUno(claves),diccAs)
@@ -428,6 +437,8 @@
     ELSE definir(dameUno(conjAs),\\ (Obtener(dameUno(conjAs),agentes(c)).posicion,\\ Obtener(dameUno(conjAs),agentes(c)).capturas,\\  Obtener(dameUno(conjAs),agentes(c)).sanciones +1),\\ sancionarAs(sinUno(conjAs),c))
     FI
 }
+
+\tadAlinearAxiomas{asSancPrem(conjPrem,conjSanc,c)}
 %false-> premia / true -> sanciona
 \tadAxioma{premiarYSancionar(conjP,c)}{ \IF $\emptyset$?(conjP) THEN agentes(c)
     ELSE{
@@ -438,16 +449,29 @@
     }
     FI
 }
-+\tadAxioma{asSancPrem(conjPrem,conjSanc)}{
-     \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$		     \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$
-     ELSE{		     ELSE{
-         \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 		         \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 
--        THEN Ag(\\ (placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),conjSanc,c))		+        THEN Ag(\\ (dameUno(conjPrem),false), asSancPrem(sinUno(conjPrem),conjSanc))
-         ELSE{		         ELSE{
-             \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)		             \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)
--            THEN Ag(\\ (placaDelAs(dameUno(conjSanc),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(conjPrem,sinUno(conjSanc),c))		+            THEN Ag(\\ (dameUno(conjSanc),true),\\ asSancPrem(conjPrem,sinUno(conjSanc)))
-             ELSE{		             ELSE{
--                    Ag((placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false), Ag((placaDelAs(dameUno(conjSanc),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc),c)))		+                    Ag((dameUno(conjPrem),false), Ag((dameUno(conjSanc), true),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc))))
+%<<<<<<< HEAD
+%+\tadAxioma{asSancPrem(conjPrem,conjSanc)}{
+%     \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$		     \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$
+%     ELSE{		     ELSE{
+%         \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 		         \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) %
+%-        THEN Ag(\\ (placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),conjSanc,c))		+     %   THEN Ag(\\ %(dameUno(conjPrem),false), asSancPrem(sinUno(conjPrem),conjSanc))
+%         ELSE{		         ELSE{
+%             \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)		             \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)
+%-            THEN Ag(\\ (placaDelAs(dameUno(conjSanc),\\ claves(agentes(c)),agentes(c)),false),\\ asSancPrem(conjPrem,sinUno(conjSanc),c))		+            THEN %Ag(\\ (dameUno(conjSanc),true),\\ asSancPrem(conjPrem,sinUno(conjSanc)))
+%             ELSE{		             ELSE{
+%-                    Ag((placaDelAs(dameUno(conjPrem),\\ claves(agentes(c)),agentes(c)),false), Ag((placaDelAs(dameUno(conjSanc),\\ %claves(agentes(c)),agentes(c)),false),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc),c)))		+                    Ag((dameUno(conjPrem),false), %Ag((dameUno(conjSanc), true),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc))))
+%=======
+\tadAxioma{asSancPrem(conjPrem,conjSanc)}{
+    \IF $\emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) THEN $\emptyset$
+    ELSE{
+        \IF $\neg \emptyset$?(conjPrem)$\land \emptyset$?(conjSanc) 
+        THEN Ag(\\ (dameUno(conjPrem),false), asSancPrem(sinUno(conjPrem),conjSanc))
+        ELSE{
+            \IF $\emptyset$?(conjPrem)$\land \neg \emptyset$?(conjSanc)
+            THEN Ag(\\ (dameUno(conjSanc),true),\\ asSancPrem(conjPrem,sinUno(conjSanc)))
+            ELSE{
+                    Ag((dameUno(conjPrem),false), Ag((dameUno(conjSanc), true),\\ asSancPrem(sinUno(conjPrem),sinUno(conjSanc))))
+%>>>>>>> fbea6333d4a05db5be2cd2f654fe85b65705be41
             }
             FI
         }
@@ -473,13 +497,15 @@
 }
 \tadAxioma{posAS(c, p)}{Obtener(p,agentes(c)).poscion}
 
+\tadAlinearAxiomas{posQueAcercanAUno(c,pos,objetivos)}
+
 \tadAxioma{posQueAcercan(c, pos, objetivos)}{
     \IF $\emptyset$?(objetivos) THEN $\emptyset$
     ELSE Ag(posQueAcercanAUno(c, pos, dameUno(objetivos)), \\posQueAcercan(pos, sinUno(objetivos)))
     FI
 }
 \tadAxioma{posQueAcercanAUno(c, pos, objetivo)}{
-    iterarDirs(objetivo, posContiguas(pos, grilla(c)), distTaxi(pos, objetivo))
+    iterarDirs(objetivo, posContiguas(pos, grilla(c)), \\distTaxi(pos, objetivo))
 }
 \tadAxioma{iterarDirs(objetivo, contiguas, dist)}{
     \IF $\emptyset$?(contiguas) THEN $\emptyset$
@@ -527,6 +553,9 @@
 }
 
 \tadAxioma{seConvierteEnHippie?(c, pos)}{cantHippiesAdyacentes(c, pos) $\geq$ 2}
+
+\tadAlinearAxiomas{buscarConvertidos(c, contiguas)}
+
 \tadAxioma{cantHippiesAdyacentes(c, pos)}{contarHippies(c, posContiguas(pos, grilla(c)))}
 \tadAxioma{contarHippies(c, contiguas)}{
     \IF $\emptyset$?(contiguas) THEN 0
@@ -585,13 +614,13 @@
 
 \tadAxioma{cantidadDeEstudiantes(c)}{ $\#$ estudiantes(c)}
 
+\tadAlinearAxiomas{losMasVigilantes(agentes, numCapturas)}
 \tadAxioma{asMasVigilante(c)}{elDeMenorPlaca(losMasVigilantes(agentes(c), \\numCapturasMax(conjuntoDeCapturas(agentes(c)))))}
 \tadAxioma{elDeMenorPlaca(placas)}{\IF $\#$placas $= 1$
-	THEN dameUno(placas)
-	ELSE min(dameUno(placas), elDeMenorPlaca(sinUno(placas)))
-	FI
+    THEN dameUno(placas)
+    ELSE min(dameUno(placas), elDeMenorPlaca(sinUno(placas)))
+    FI
 }
-\tadAlinearAxiomas{losMasVigilantes(agentes, numCapturas)}
 \tadAxioma{losMasVigilantes(agentes, numCapturas)}{ \IF $\#$claves(agentes) $= 1$
     THEN dameUno(claves(agentes))
     ELSE{
